@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@layer components {
+  .filter-input {
+    @apply w-full mb-3 px-4 py-3 rounded-xl border border-neutral-300 
+           text-sm focus:outline-none focus:ring-2 focus:ring-black/60;
+  }
+}
