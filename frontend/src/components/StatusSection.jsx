@@ -75,8 +75,11 @@ export default function StatsSection() {
   return (
     <section
       ref={statsRef}
-      className="w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 py-16 sm:py-20"
-    >
+      className="
+        hidden md:block
+        w-full bg-gradient-to-br from-gray-50 via-white to-gray-50
+        py-16 sm:py-20"
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {stats.map((stat, index) => (
@@ -87,7 +90,7 @@ export default function StatsSection() {
               <div className="relative inline-block">
                 {/* Decorative background circle */}
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full blur-2xl opacity-20 scale-150"></div>
-                
+
                 {/* Number */}
                 <h3
                   ref={(el) => (countersRef.current[index] = el)}

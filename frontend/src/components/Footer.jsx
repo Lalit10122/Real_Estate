@@ -34,7 +34,7 @@ const Footer = () => {
 
             <div className="flex gap-4">
               <Facebook className="w-5 h-5 text-gray-500 hover:text-black cursor-pointer" />
-              <Twitter className="w-5 h-5 text-gray-500 hover:text-black cursor-pointer" />
+              <Twitter className="w-5 h-5 text-gray-500 :text-black cursor-pointer" />
               <Instagram className="w-5 h-5 text-gray-500 hover:text-black cursor-pointer" />
               <Linkedin className="w-5 h-5 text-gray-500 hover:text-black cursor-pointer" />
             </div>
