@@ -82,21 +82,19 @@ export default function PropertyFilter() {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-2xl font-bold text-neutral-900 flex items-center gap-2">
-            Find Your Property
+          <h3 className="text-1.5xl font-bold text-neutral-900 flex items-center gap-1.5">
+    
             {activeFilters > 0 && (
               <span className="text-sm font-semibold px-2.5 py-1 bg-black text-white rounded-full">
                 {activeFilters}
               </span>
             )}
           </h3>
-          <p className="text-neutral-500 text-sm mt-1">
-            Filter by location, type, price, and more
-          </p>
+          
         </div>
         {activeFilters > 0 && (
           <button
