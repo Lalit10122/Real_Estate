@@ -170,7 +170,7 @@ const FeaturesSelector = ({
 
       {/* Facing Direction */}
       <FeatureSection title="Facing Direction" icon={Compass}>
-        <div className="grid grid-cols-4 gap-4 mb-2">
+        <div className="grid grid-cols-4 gap-4 mb-4">
           {facingOptions.slice(0, 4).map((option) => (
             <button
               key={option.value}
@@ -191,7 +191,7 @@ const FeaturesSelector = ({
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-4 gap-4">
           {facingOptions.slice(4).map((option) => (
             <button
               key={option.value}

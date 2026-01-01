@@ -1,46 +1,8 @@
-// const propertyData = [
-//   {
-//     id: 1,
-//     title: "3 BHK Luxury Flat in Vaishali Nagar",
-//     area: "Vaishali Nagar",
-//     state: "Rajasthan",
-//     city: "Jaipur",
-//     location: "sector 34 , bkc tower",
-//     image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-//     type: "plot",
-//     price: "75L",
-//     bedrooms: 3,
-//     bathrooms: 2,
-//     area: "1450",
-//     rating: 4.5,
-//     views: 245,
-//     isFeatured: true,
-//     isVerified: true,
-//     otherDetails: "",
-//   },
-//   {
-//     id: 2,
-//     title: "3 BHK Luxury Flat in Vaishali Nagar",
-//     area: "Vaishali Nagar",
-//     state: "Rajasthan",
-//     city: "Jaipur",
-//     location: "sector 34 , bkc tower",
-//     image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-//     type: "plot",
-//     price: "75L",
-//     bedrooms: 3,
-//     bathrooms: 2,
-//     area: "1450",
-//     rating: 4.5,
-//     views: 245,
-//     isFeatured: true,
-//     isVerified: true,
-//     otherDetails: "",
-//   },
-// ];
+
 
 const propertyData = [
   {
+    id:1,
     description: "Spacious 3BHK apartment with modern amenities...",
     propertyType: "flat",
     listingType: "sell",
@@ -210,6 +172,7 @@ const propertyData = [
     },
   },
    {
+    id:2,
     description: "Spacious 3BHK apartment with modern amenities...",
     propertyType: "flat",
     listingType: "sell",

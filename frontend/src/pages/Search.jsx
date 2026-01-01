@@ -1,519 +1,722 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react'
+import { Home, X, ChevronUp, ChevronDown, IndianRupee, MapPin, Grid2x2Plus, Ruler, SquarePlus, Trees, Search as SearchIcon, SlidersHorizontal } from 'lucide-react'
+import PriceRangeSlider from '../components/PriceRangeSlider'
+import LocationSelector from '../components/LocationSelector'
+import BedroomBathroomSelector from '../components/BedroomBathroomSelector'
+import AreaRangeSlider from '../components/AreaRangeSlider'
+import AmenitiesSelector from '../components/AmenitiesSelector'
+import FeaturesSelector from '../components/FeaturesSelector'
+import PropertyToggles from '../components/PropertyToggles'
+import PropertyCard from '../components/PropertyCard'
 
-import { MapPin, BedDouble, Bath, Maximize2, Heart, Share2, Eye, CheckCircle, Star, Phone, Mail } from 'lucide-react';
-import PropertySearchFilter from '../components/PropertySearchFilter';
+import propertyData from '../assets/Data/Property'
+import SkeletonLoader from '../components/PropertyCardSkeleton'
 
 const Search = () => {
-  const [filters, setFilters] = useState({});
-  const [viewMode, setViewMode] = useState('grid');
+  // Filter States
+  const [isBuy, setisBuy] = useState(true)
+  const [propertyType, setpropertyType] = useState("")
+  const [startPriceRange, setstartPriceRange] = useState("")
+  const [endPriceRange, setendPriceRange] = useState("")
+  const [state, setstate] = useState("")
+  const [city, setcity] = useState("")
+  const [area, setarea] = useState("")
+  const [pinCode, setpinCode] = useState("")
+  const [bedRooms, setbedRooms] = useState([])
+  const [bathRooms, setbathRooms] = useState([])
+  const [startArea, setstartArea] = useState("")
+  const [endArea, setendArea] = useState("")
+  const [aminities, setaminities] = useState([])
 
-  // Sample property data with complete structure
-  const properties = [
-    {
-      id: 1,
-      description: "Spacious 3BHK apartment with modern amenities, excellent ventilation, and prime location near Phoenix Mall.",
-      propertyType: "flat",
-      listingType: "sell",
-      area: {
-        value: 1450,
-        unit: "sqft",
-      },
-      price: {
-        amount: 7500000,
-        display: "75L",
-        negotiable: true,
-        pricePerSqft: 5172,
-      },
-      bedrooms: 3,
-      bathrooms: 2,
-      owner: {
-        id: "user_123",
-        name: "John Doe",
-        phone: "+91-9876543210",
-        email: "john@example.com",
-        verified: true,
-        type: "owner",
-      },
-      amenities: [
-        "parking", "gym", "swimming-pool", "garden", "security",
-        "power-backup", "lift", "club-house",
-      ],
-      features: {
-        furnished: "semi-furnished",
-        facing: "east",
-        floorNumber: 5,
-        totalFloors: 12,
-        parking: {
-          covered: 1,
-          open: 1,
-        },
-        balconies: 2,
-        age: "2-5 years",
-        possession: "ready-to-move",
-      },
-      location: {
-        address: "Sector 34, BKC Tower",
-        area: "Vaishali Nagar",
-        city: "Jaipur",
-        state: "Rajasthan",
-        pincode: "302021",
-        landmark: "Near Phoenix Mall",
-        coordinates: {
-          lat: 26.9124,
-          lng: 75.7873,
-        },
-        nearby: {
-          schools: ["DPS School - 1.2km", "Ryan International - 2km"],
-          hospitals: ["Fortis Hospital - 3km"],
-          malls: ["Phoenix Mall - 500m"],
-          metro: "Mansarovar Metro - 2.5km",
-        },
-      },
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
-          isPrimary: true,
-          caption: "Living Room",
-        },
-      ],
-      status: "active",
-      availability: {
-        available: true,
-        availableFrom: "2024-01-01",
-        immediatelyAvailable: true,
-      },
-      isFeatured: true,
-      isVerified: true,
-      isPremium: false,
-      metrics: {
-        views: 245,
-        favorites: 45,
-        inquiries: 12,
-        lastViewed: "2024-12-30T10:30:00Z",
-        trending: true,
-      },
-      seo: {
-        slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
-        metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
-        metaDescription: "Spacious 3BHK apartment...",
-      },
-      apartment: {
-        societyName: "Prestige Gardens",
-        towerBlock: "Tower A",
-        maintenanceCharges: 3500,
-        maintenanceFrequency: "monthly",
-      },
-    },
-    {
-      id: 2,
-      description: "Luxurious 4BHK villa with private garden and modern amenities in a prime location.",
-      propertyType: "villa",
-      listingType: "sell",
-      area: {
-        value: 2500,
-        unit: "sqft",
-      },
-      price: {
-        amount: 12000000,
-        display: "1.2Cr",
-        negotiable: true,
-        pricePerSqft: 4800,
-      },
-      bedrooms: 4,
-      bathrooms: 3,
-      owner: {
-        id: "user_456",
-        name: "Jane Smith",
-        phone: "+91-9876543211",
-        email: "jane@example.com",
-        verified: true,
-        type: "owner",
-      },
-      amenities: [
-        "parking", "gym", "swimming-pool", "garden", "security", "power-backup",
-      ],
-      features: {
-        furnished: "furnished",
-        facing: "north",
-        floorNumber: 0,
-        totalFloors: 2,
-        parking: {
-          covered: 2,
-          open: 1,
-        },
-        balconies: 3,
-        age: "0-1 years",
-        possession: "ready-to-move",
-      },
-      location: {
-        address: "Sector 12, Green Valley",
-        area: "Malviya Nagar",
-        city: "Jaipur",
-        state: "Rajasthan",
-        pincode: "302017",
-        landmark: "Near City Plaza",
-      },
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
-          isPrimary: true,
-          caption: "Front View",
-        },
-      ],
-      status: "active",
-      availability: {
-        available: true,
-        immediatelyAvailable: true,
-      },
-      isFeatured: true,
-      isVerified: true,
-      isPremium: true,
-      metrics: {
-        views: 189,
-        favorites: 32,
-        inquiries: 8,
-        trending: true,
-      },
-      villa: {
-        floors: 2,
-        servants_quarters: true,
-        garden: true,
-        gardenArea: "500 sqft",
-      },
-    },
-    {
-      id: 3,
-      description: "Commercial plot near highway with great visibility and access.",
-      propertyType: "plot",
-      listingType: "sell",
-      area: {
-        value: 1000,
-        unit: "sqft",
-      },
-      price: {
-        amount: 4500000,
-        display: "45L",
-        negotiable: true,
-        pricePerSqft: 4500,
-      },
-      bedrooms: 0,
-      bathrooms: 0,
-      owner: {
-        id: "user_789",
-        name: "Mike Johnson",
-        phone: "+91-9876543212",
-        email: "mike@example.com",
-        verified: true,
-        type: "agent",
-      },
-      amenities: [],
-      features: {
-        furnished: "unfurnished",
-        facing: "south",
-        age: "new",
-        possession: "ready-to-move",
-      },
-      location: {
-        address: "Near Apex Circle",
-        area: "Ajmer Road",
-        city: "Jaipur",
-        state: "Rajasthan",
-        pincode: "302006",
-        landmark: "Apex Circle",
-      },
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
-          isPrimary: true,
-          caption: "Plot View",
-        },
-      ],
-      status: "active",
-      availability: {
-        available: true,
-        immediatelyAvailable: true,
-      },
-      isFeatured: false,
-      isVerified: true,
-      metrics: {
-        views: 156,
-        favorites: 18,
-        inquiries: 5,
-      },
-      plot: {
-        plotNumber: "45",
-        dimensions: "40x25 feet",
-        boundaryWall: true,
-        cornerPlot: false,
-        roadWidth: "30 feet",
-        facingRoad: true,
-      },
-    },
-    {
-      id: 4,
-      description: "Modern 2BHK apartment in prime C-Scheme location.",
-      propertyType: "flat",
-      listingType: "rent",
-      area: {
-        value: 1200,
-        unit: "sqft",
-      },
-      price: {
-        amount: 25000,
-        display: "25K/month",
-        negotiable: false,
-        pricePerSqft: 21,
-      },
-      bedrooms: 2,
-      bathrooms: 2,
-      owner: {
-        id: "user_234",
-        name: "Sarah Williams",
-        phone: "+91-9876543213",
-        email: "sarah@example.com",
-        verified: false,
-        type: "owner",
-      },
-      amenities: [
-        "parking", "lift", "security", "power-backup",
-      ],
-      features: {
-        furnished: "semi-furnished",
-        facing: "west",
-        floorNumber: 3,
-        totalFloors: 8,
-        parking: {
-          covered: 1,
-          open: 0,
-        },
-        balconies: 1,
-        age: "5-10 years",
-        possession: "ready-to-move",
-      },
-      location: {
-        address: "Ashok Marg",
-        area: "C-Scheme",
-        city: "Jaipur",
-        state: "Rajasthan",
-        pincode: "302001",
-        landmark: "Near Ganpati Plaza",
-      },
-      images: [
-        {
-          url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
-          isPrimary: true,
-          caption: "Living Room",
-        },
-      ],
-      status: "active",
-      availability: {
-        available: true,
-        availableFrom: "2025-01-15",
-        immediatelyAvailable: false,
-      },
-      isFeatured: false,
-      isVerified: false,
-      metrics: {
-        views: 203,
-        favorites: 28,
-        inquiries: 7,
-      },
-      apartment: {
-        societyName: "Royal Residency",
-        towerBlock: "B",
-        maintenanceCharges: 2000,
-        maintenanceFrequency: "monthly",
-      },
-      rental: {
-        monthlyRent: 25000,
-        securityDeposit: 75000,
-        maintenanceIncluded: false,
-        preferredTenants: "family",
-        leaseDuration: "11 months minimum",
-        availableFor: "longterm",
-      },
-    },
-  ];
+  // Features
+  const [furnishingStatus, setfurnishingStatus] = useState("")
+  const [possessionStatus, setpossessionStatus] = useState("")
+  const [propertyAge, setpropertyAge] = useState("")
+  const [facingDirection, setfacingDirection] = useState("")
 
-  const handleFilterChange = (newFilters) => {
-    setFilters(newFilters);
-    console.log('Filters updated:', newFilters);
-  };
+  // Toggles
+  const [igVerifiedProperty, setigVerifiedProperty] = useState(false)
+  const [isFeaturedProperty, setisFeaturedProperty] = useState(false)
+  const [isParking, setisParking] = useState(false)
+  const [immediatelyAvailable, setimmediatelyAvailable] = useState(false)
 
-  const PropertyCard = ({ property }) => (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer group">
-      <div className="relative h-56 overflow-hidden bg-gray-100">
-        <img 
-          src={property.images[0]?.url} 
-          alt={property.seo?.metaTitle || property.description} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-        />
-        <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
-          {property.isFeatured && (
-            <span className="px-3 py-1 bg-black text-white text-xs font-semibold rounded-full">
-              Featured
-            </span>
-          )}
-          {property.isVerified && (
-            <span className="px-3 py-1 bg-white text-black text-xs font-semibold rounded-full flex items-center gap-1">
-              <CheckCircle size={12} /> Verified
-            </span>
-          )}
-          {property.isPremium && (
-            <span className="px-3 py-1 bg-gradient-to-r from-gray-900 to-gray-700 text-white text-xs font-semibold rounded-full">
-              Premium
-            </span>
-          )}
-        </div>
-        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-          <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg">
-            <Heart size={18} />
-          </button>
-          <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-colors shadow-lg">
-            <Share2 size={18} />
-          </button>
-        </div>
-      </div>
-      
-      <div className="p-5">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3 className="text-base font-bold text-gray-900 mb-1 line-clamp-2">
-              {property.seo?.metaTitle || property.description.substring(0, 50) + '...'}
-            </h3>
-            <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs font-medium rounded uppercase">
-              {property.propertyType}
-            </span>
-          </div>
-          <div className="text-right ml-3">
-            <div className="text-xl font-bold text-gray-900">₹{property.price.display}</div>
-            {property.price.negotiable && (
-              <span className="text-xs text-gray-500">Negotiable</span>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-1.5 text-gray-600 text-sm mb-4">
-          <MapPin size={14} className="flex-shrink-0" />
-          <span className="line-clamp-1">{property.location.address}, {property.location.area}</span>
-        </div>
-        
-        <div className="flex gap-4 py-3 border-t border-b border-gray-200 mb-3">
-          {property.bedrooms > 0 && (
-            <div className="flex items-center gap-1.5 text-sm text-gray-700">
-              <BedDouble size={16} />
-              <span className="font-medium">{property.bedrooms}</span>
-            </div>
-          )}
-          {property.bathrooms > 0 && (
-            <div className="flex items-center gap-1.5 text-sm text-gray-700">
-              <Bath size={16} />
-              <span className="font-medium">{property.bathrooms}</span>
-            </div>
-          )}
-          <div className="flex items-center gap-1.5 text-sm text-gray-700">
-            <Maximize2 size={16} />
-            <span className="font-medium">{property.area.value} {property.area.unit}</span>
-          </div>
-        </div>
+  // Shown States
+  const [isPropertyTypeShowm, setisPropertyTypeShowm] = useState(false)
+  const [isPriceRangeShown, setisPriceRangeShown] = useState(false)
+  const [isLocationShown, setisLocationShown] = useState(false)
+  const [isbedroomShown, setisbedroomShown] = useState(false)
+  const [isAreaShown, setisAreaShown] = useState(false)
+  const [isAminitiesShown, setisAminitiesShown] = useState(false)
+  const [isFeaturesShown, setisFeaturesShown] = useState(false)
 
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {property.features.furnished && (
-            <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded capitalize">
-              {property.features.furnished}
-            </span>
-          )}
-          {property.features.possession && (
-            <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded capitalize">
-              {property.features.possession}
-            </span>
-          )}
-          {property.features.facing && (
-            <span className="px-2.5 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded capitalize">
-              {property.features.facing} facing
-            </span>
-          )}
-        </div>
-        
-        <div className="flex justify-between items-center">
-          <div className="flex gap-3 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Eye size={14} />
-              <span>{property.metrics.views}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Heart size={14} />
-              <span>{property.metrics.favorites}</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-600">
-            <span className="capitalize font-medium">{property.owner.type}</span>
-            {property.owner.verified && <CheckCircle size={12} />}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  // Search Results States
+  const [filteredProperties, setFilteredProperties] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [showMobileFilter, setShowMobileFilter] = useState(false)
+
+  // Filter Properties
+  const filterProperties = () => {
+    setIsLoading(true)
+
+    setTimeout(() => {
+      let results = [...propertyData]
+
+      results = results.filter(property => 
+        property.listingType === (isBuy ? 'sell' : 'rent')
+      )
+
+      if (propertyType) {
+        results = results.filter(property => 
+          property.propertyType === propertyType
+        )
+      }
+
+      if (startPriceRange || endPriceRange) {
+        results = results.filter(property => {
+          const price = property.price.amount
+          const minPrice = startPriceRange || 0
+          const maxPrice = endPriceRange || Infinity
+          return price >= minPrice && price <= maxPrice
+        })
+      }
+
+      if (state) {
+        results = results.filter(property => 
+          property.location.state === state
+        )
+      }
+      if (city) {
+        results = results.filter(property => 
+          property.location.city === city
+        )
+      }
+      if (area) {
+        results = results.filter(property => 
+          property.location.area.toLowerCase().includes(area.toLowerCase())
+        )
+      }
+      if (pinCode) {
+        results = results.filter(property => 
+          property.location.pincode === pinCode
+        )
+      }
+
+      if (bedRooms.length > 0) {
+        results = results.filter(property => {
+          const bhk = property.description?.match(/(\d+)BHK/)?.[1]
+          return bedRooms.includes(bhk) || bedRooms.includes(bhk + '+')
+        })
+      }
+
+      if (startArea || endArea) {
+        results = results.filter(property => {
+          const propertyArea = property.area.value
+          const minArea = startArea || 0
+          const maxArea = endArea || Infinity
+          return propertyArea >= minArea && propertyArea <= maxArea
+        })
+      }
+
+      if (aminities.length > 0) {
+        results = results.filter(property => 
+          aminities.every(amenity => 
+            property.amenities?.includes(amenity)
+          )
+        )
+      }
+
+      if (furnishingStatus) {
+        results = results.filter(property => 
+          property.features?.furnished === furnishingStatus
+        )
+      }
+
+      if (possessionStatus) {
+        results = results.filter(property => 
+          property.features?.possession === possessionStatus
+        )
+      }
+
+      if (propertyAge) {
+        results = results.filter(property => 
+          property.features?.age === propertyAge
+        )
+      }
+
+      if (facingDirection) {
+        results = results.filter(property => 
+          property.features?.facing === facingDirection
+        )
+      }
+
+      if (igVerifiedProperty) {
+        results = results.filter(property => property.isVerified === true)
+      }
+
+      if (isFeaturedProperty) {
+        results = results.filter(property => property.isFeatured === true)
+      }
+
+      if (isParking) {
+        results = results.filter(property => 
+          property.features?.parking && 
+          (property.features.parking.covered > 0 || property.features.parking.open > 0)
+        )
+      }
+
+      if (immediatelyAvailable) {
+        results = results.filter(property => 
+          property.availability?.immediatelyAvailable === true
+        )
+      }
+
+      setFilteredProperties(results)
+      setIsLoading(false)
+    }, 800)
+  }
+
+  useEffect(() => {
+    filterProperties()
+  }, [
+    isBuy, propertyType, startPriceRange, endPriceRange, 
+    state, city, area, pinCode, bedRooms, bathRooms,
+    startArea, endArea, aminities, furnishingStatus,
+    possessionStatus, propertyAge, facingDirection,
+    igVerifiedProperty, isFeaturedProperty, isParking, immediatelyAvailable
+  ])
+
+  const clearAllFilters = () => {
+    setisBuy(true)
+    setpropertyType("")
+    setstartPriceRange("")
+    setendPriceRange("")
+    setstate("")
+    setcity("")
+    setarea("")
+    setpinCode("")
+    setbedRooms([])
+    setbathRooms([])
+    setstartArea("")
+    setendArea("")
+    setaminities([])
+    setfurnishingStatus("")
+    setpossessionStatus("")
+    setpropertyAge("")
+    setfacingDirection("")
+    setigVerifiedProperty(false)
+    setisFeaturedProperty(false)
+    setisParking(false)
+    setimmediatelyAvailable(false)
+  }
+
+  const getActiveFilterCount = () => {
+    let count = 0
+    if (propertyType) count++
+    if (startPriceRange || endPriceRange) count++
+    if (state || city || area || pinCode) count++
+    if (bedRooms.length > 0) count++
+    if (bathRooms.length > 0) count++
+    if (startArea || endArea) count++
+    if (aminities.length > 0) count++
+    if (furnishingStatus) count++
+    if (possessionStatus) count++
+    if (propertyAge) count++
+    if (facingDirection) count++
+    if (igVerifiedProperty) count++
+    if (isFeaturedProperty) count++
+    if (isParking) count++
+    if (immediatelyAvailable) count++
+    return count
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <div className="w-full max-w-[420px] lg:block hidden">
-        <PropertySearchFilter onFilterChange={handleFilterChange} />
-      </div>
-
-      <div className="flex-1 p-6 lg:p-10 overflow-y-auto">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 pb-6 border-b border-gray-200">
-          <div>
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-              {properties.length} Properties
-            </h1>
-            <p className="text-gray-600">Found in Jaipur, Rajasthan</p>
+      {/* Desktop Filter Sidebar */}
+      <div className='w-1/3 bg-gray-100 hidden lg:block rounded-[10px] shadow-md m-2 pb-1.5 h-screen overflow-y-auto sticky top-2'>
+        <div className='border-b-[1px] border-gray-300 bg-white rounded-t-[10px] sticky top-0 z-10'>
+          <div className='flex justify-between mt-4 p-2 border-b-[1px] border-gray-300'>
+            <h1 className='text-3xl m-2'>Property Filters</h1>
+            <div 
+              onClick={clearAllFilters}
+              className='lg:m-2 lg:h-[40px] lg:px-4 py-1 flex justify-center bg-black text-white rounded-[10px] items-center gap-1 cursor-pointer hover:scale-110 duration-400 hover:shadow-2xl ease-in'
+            >
+              <X size={16} />
+              <h4>Clear All</h4>
+            </div>
           </div>
-          <div className="flex gap-2 bg-white border border-gray-200 rounded-lg p-1">
-            <button 
-              className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
-                viewMode === 'grid' 
-                  ? 'bg-black text-white' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setViewMode('grid')}
+
+          <div className='flex justify-center gap-8 py-3 m-2'>
+            <div 
+              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
+              onClick={() => setisBuy(true)}
             >
-              Grid View
-            </button>
-            <button 
-              className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${
-                viewMode === 'list' 
-                  ? 'bg-black text-white' 
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={() => setViewMode('list')}
+              <div>Buy</div>
+            </div>
+            <div 
+              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
+              onClick={() => setisBuy(false)}
             >
-              List View
-            </button>
+              <div>Rent</div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {properties.map(property => (
-            <PropertyCard key={property.id} property={property} />
-          ))}
+        {/* Property Type */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <Home size={16} />
+              <h3>Property Type</h3>
+            </div>
+            <div onClick={() => setisPropertyTypeShowm(!isPropertyTypeShowm)}>
+              {isPropertyTypeShowm ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isPropertyTypeShowm ? 'grid grid-cols-2 p-2 gap-4' : 'hidden'}`}>
+            <div className={`hover:scale-105 duration-400 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'flat' ? 'bg-black text-white' : ''} cursor-pointer`}
+              onClick={() => setpropertyType(propertyType === 'flat' ? '' : 'flat')}><h2>Flat</h2></div>
+            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'villa' ? 'bg-black text-white' : ''} cursor-pointer`}
+              onClick={() => setpropertyType(propertyType === 'villa' ? '' : 'villa')}><h2>Villa</h2></div>
+            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'plot' ? 'bg-black text-white' : ''} cursor-pointer`}
+              onClick={() => setpropertyType(propertyType === 'plot' ? '' : 'plot')}><h2>Plot</h2></div>
+            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'commercial' ? 'bg-black text-white' : ''} cursor-pointer`}
+              onClick={() => setpropertyType(propertyType === 'commercial' ? '' : 'commercial')}><h2>Commercial</h2></div>
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <IndianRupee size={16} />
+              <h3>Price Range</h3>
+            </div>
+            <div onClick={() => setisPriceRangeShown(!isPriceRangeShown)}>
+              {isPriceRangeShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isPriceRangeShown ? '' : 'hidden'}`}>
+            <PriceRangeSlider startPriceRange={startPriceRange} endPriceRange={endPriceRange} setendPriceRange={setendPriceRange} setstartPriceRange={setstartPriceRange} />
+          </div>
+        </div>
+
+        {/* Location */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <MapPin size={16} />
+              <h3>Location</h3>
+            </div>
+            <div onClick={() => setisLocationShown(!isLocationShown)}>
+              {isLocationShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isLocationShown ? 'p-2' : 'hidden'}`}>
+            <LocationSelector
+              state={state}
+              setstate={setstate}
+              city={city}
+              setcity={setcity}
+              area={area}
+              setarea={setarea}
+              pinCode={pinCode}
+              setpinCode={setpinCode}
+            />
+          </div>
+        </div>
+
+        {/* Bedrooms and Bathrooms */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <Grid2x2Plus size={16} />
+              <h3>Bedrooms and Bathrooms</h3>
+            </div>
+            <div onClick={() => setisbedroomShown(!isbedroomShown)}>
+              {isbedroomShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isbedroomShown ? 'p-2' : 'hidden'}`}>
+            <BedroomBathroomSelector
+              bedrooms={bedRooms}
+              setBedrooms={setbedRooms}
+              bathrooms={bathRooms}
+              setBathrooms={setbathRooms}
+            />
+          </div>
+        </div>
+
+        {/* Area */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <Ruler size={16} />
+              <h3>Set Area</h3>
+            </div>
+            <div onClick={() => setisAreaShown(!isAreaShown)}>
+              {isAreaShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isAreaShown ? 'p-2' : 'hidden'}`}>
+            <AreaRangeSlider setstartArea={setstartArea} setendArea={setendArea} startArea={startArea} endArea={endArea} />
+          </div>
+        </div>
+
+        {/* Amenities */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <Trees size={16} />
+              <h3>Select Amenities</h3>
+            </div>
+            <div onClick={() => setisAminitiesShown(!isAminitiesShown)}>
+              {isAminitiesShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isAminitiesShown ? 'p-2' : 'hidden'}`}>
+            <AmenitiesSelector
+              amenities={aminities}
+              setAmenities={setaminities}
+            />
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='flex gap-2 items-center justify-between p-3'>
+            <div className='flex gap-2 items-center justify-center'>
+              <SquarePlus size={16} />
+              <h3>Select Features</h3>
+            </div>
+            <div onClick={() => setisFeaturesShown(!isFeaturesShown)}>
+              {isFeaturesShown ? <ChevronUp /> : <ChevronDown />}
+            </div>
+          </div>
+          <div className={`${isFeaturesShown ? 'p-2' : 'hidden'}`}>
+            <FeaturesSelector
+              furnishingStatus={furnishingStatus}
+              setfurnishingStatus={setfurnishingStatus}
+              possessionStatus={possessionStatus}
+              setpossessionStatus={setpossessionStatus}
+              propertyAge={propertyAge}
+              setpropertyAge={setpropertyAge}
+              facingDirection={facingDirection}
+              setfacingDirection={setfacingDirection}
+            />
+          </div>
+        </div>
+
+        {/* Toggles */}
+        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
+          <div className='p-2'>
+            <PropertyToggles
+              igVerifiedProperty={igVerifiedProperty}
+              setigVerifiedProperty={setigVerifiedProperty}
+              isFeaturedProperty={isFeaturedProperty}
+              setisFeaturedProperty={setisFeaturedProperty}
+              isParking={isParking}
+              setisParking={setisParking}
+              immediatelyAvailable={immediatelyAvailable}
+              setimmediatelyAvailable={setimmediatelyAvailable}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Mobile Filter Toggle (Optional) */}
-      <button className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform z-50">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="4" y1="21" x2="4" y2="14"></line>
-          <line x1="4" y1="10" x2="4" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12" y2="3"></line>
-          <line x1="20" y1="21" x2="20" y2="16"></line>
-          <line x1="20" y1="12" x2="20" y2="3"></line>
-          <line x1="1" y1="14" x2="7" y2="14"></line>
-          <line x1="9" y1="8" x2="15" y2="8"></line>
-          <line x1="17" y1="16" x2="23" y2="16"></line>
-        </svg>
+      {/* Mobile Filter Button */}
+      <button
+        onClick={() => setShowMobileFilter(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 w-14 h-14 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-transform"
+      >
+        <SlidersHorizontal size={24} />
+        {getActiveFilterCount() > 0 && (
+          <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+            {getActiveFilterCount()}
+          </span>
+        )}
       </button>
+
+      {/* Mobile Filter Sheet */}
+      {showMobileFilter && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="lg:hidden fixed inset-0 bg-black/50 z-50 animate-in fade-in duration-200"
+            onClick={() => setShowMobileFilter(false)}
+          />
+
+          {/* Filter Sheet */}
+          <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-gray-100 rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col">
+            {/* Sheet Header */}
+            <div className='border-b-[1px] border-gray-300 bg-white rounded-t-3xl sticky top-0 z-10'>
+              <div className='flex justify-between items-center p-4 border-b-[1px] border-gray-300'>
+                <h1 className='text-2xl font-bold'>Filters</h1>
+                <button 
+                  onClick={() => setShowMobileFilter(false)}
+                  className='p-2 hover:bg-gray-100 rounded-full transition-colors'
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Buy/Rent Toggle */}
+              <div className='flex justify-center gap-4 py-3 px-4'>
+                <div 
+                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
+                  onClick={() => setisBuy(true)}
+                >
+                  Buy
+                </div>
+                <div 
+                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
+                  onClick={() => setisBuy(false)}
+                >
+                  Rent
+                </div>
+              </div>
+            </div>
+
+            {/* Scrollable Filter Content */}
+            <div className='flex-1 overflow-y-auto p-4'>
+              {/* Property Type */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <Home size={16} />
+                    <h3 className='text-sm font-semibold'>Property Type</h3>
+                  </div>
+                  <div onClick={() => setisPropertyTypeShowm(!isPropertyTypeShowm)}>
+                    {isPropertyTypeShowm ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isPropertyTypeShowm ? 'grid grid-cols-2 gap-3 mt-3' : 'hidden'}`}>
+                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'flat' ? 'bg-black text-white' : ''} cursor-pointer`}
+                    onClick={() => setpropertyType(propertyType === 'flat' ? '' : 'flat')}>Flat</div>
+                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'villa' ? 'bg-black text-white' : ''} cursor-pointer`}
+                    onClick={() => setpropertyType(propertyType === 'villa' ? '' : 'villa')}>Villa</div>
+                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'plot' ? 'bg-black text-white' : ''} cursor-pointer`}
+                    onClick={() => setpropertyType(propertyType === 'plot' ? '' : 'plot')}>Plot</div>
+                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'commercial' ? 'bg-black text-white' : ''} cursor-pointer`}
+                    onClick={() => setpropertyType(propertyType === 'commercial' ? '' : 'commercial')}>Commercial</div>
+                </div>
+              </div>
+
+              {/* Price Range */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <IndianRupee size={16} />
+                    <h3 className='text-sm font-semibold'>Price Range</h3>
+                  </div>
+                  <div onClick={() => setisPriceRangeShown(!isPriceRangeShown)}>
+                    {isPriceRangeShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isPriceRangeShown ? 'mt-2' : 'hidden'}`}>
+                  <PriceRangeSlider startPriceRange={startPriceRange} endPriceRange={endPriceRange} setendPriceRange={setendPriceRange} setstartPriceRange={setstartPriceRange} />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <MapPin size={16} />
+                    <h3 className='text-sm font-semibold'>Location</h3>
+                  </div>
+                  <div onClick={() => setisLocationShown(!isLocationShown)}>
+                    {isLocationShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isLocationShown ? 'mt-2' : 'hidden'}`}>
+                  <LocationSelector
+                    state={state}
+                    setstate={setstate}
+                    city={city}
+                    setcity={setcity}
+                    area={area}
+                    setarea={setarea}
+                    pinCode={pinCode}
+                    setpinCode={setpinCode}
+                  />
+                </div>
+              </div>
+
+              {/* Bedrooms and Bathrooms */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <Grid2x2Plus size={16} />
+                    <h3 className='text-sm font-semibold'>Bedrooms & Bathrooms</h3>
+                  </div>
+                  <div onClick={() => setisbedroomShown(!isbedroomShown)}>
+                    {isbedroomShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isbedroomShown ? 'mt-2' : 'hidden'}`}>
+                  <BedroomBathroomSelector
+                    bedrooms={bedRooms}
+                    setBedrooms={setbedRooms}
+                    bathrooms={bathRooms}
+                    setBathrooms={setbathRooms}
+                  />
+                </div>
+              </div>
+
+              {/* Area */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <Ruler size={16} />
+                    <h3 className='text-sm font-semibold'>Area</h3>
+                  </div>
+                  <div onClick={() => setisAreaShown(!isAreaShown)}>
+                    {isAreaShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isAreaShown ? 'mt-2' : 'hidden'}`}>
+                  <AreaRangeSlider setstartArea={setstartArea} setendArea={setendArea} startArea={startArea} endArea={endArea} />
+                </div>
+              </div>
+
+              {/* Amenities */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <Trees size={16} />
+                    <h3 className='text-sm font-semibold'>Amenities</h3>
+                  </div>
+                  <div onClick={() => setisAminitiesShown(!isAminitiesShown)}>
+                    {isAminitiesShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isAminitiesShown ? 'mt-2' : 'hidden'}`}>
+                  <AmenitiesSelector
+                    amenities={aminities}
+                    setAmenities={setaminities}
+                  />
+                </div>
+              </div>
+
+              {/* Features */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <div className='flex gap-2 items-center justify-between mb-2'>
+                  <div className='flex gap-2 items-center'>
+                    <SquarePlus size={16} />
+                    <h3 className='text-sm font-semibold'>Features</h3>
+                  </div>
+                  <div onClick={() => setisFeaturesShown(!isFeaturesShown)}>
+                    {isFeaturesShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </div>
+                </div>
+                <div className={`${isFeaturesShown ? 'mt-2' : 'hidden'}`}>
+                  <FeaturesSelector
+                    furnishingStatus={furnishingStatus}
+                    setfurnishingStatus={setfurnishingStatus}
+                    possessionStatus={possessionStatus}
+                    setpossessionStatus={setpossessionStatus}
+                    propertyAge={propertyAge}
+                    setpropertyAge={setpropertyAge}
+                    facingDirection={facingDirection}
+                    setfacingDirection={setfacingDirection}
+                  />
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+                <PropertyToggles
+                  igVerifiedProperty={igVerifiedProperty}
+                  setigVerifiedProperty={setigVerifiedProperty}
+                  isFeaturedProperty={isFeaturedProperty}
+                  setisFeaturedProperty={setisFeaturedProperty}
+                  isParking={isParking}
+                  setisParking={setisParking}
+                  immediatelyAvailable={immediatelyAvailable}
+                  setimmediatelyAvailable={setimmediatelyAvailable}
+                />
+              </div>
+            </div>
+
+            {/* Sheet Footer - Sticky */}
+            <div className='border-t border-gray-300 bg-white p-4 flex gap-3'>
+              {getActiveFilterCount() > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className='flex-1 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold active:scale-95 transition-transform'
+                >
+                  Clear All
+                </button>
+              )}
+              <button
+                onClick={() => setShowMobileFilter(false)}
+                className='flex-1 py-3 bg-black text-white rounded-xl font-semibold active:scale-95 transition-transform flex items-center justify-center gap-2'
+              >
+                <SearchIcon size={20} />
+                Show {filteredProperties.length} Results
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Results Section */}
+      <div className="flex-1 p-4 lg:p-6">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
+                {isBuy ? 'Properties for Sale' : 'Properties for Rent'}
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {isLoading ? 'Searching...' : `${filteredProperties.length} properties found`}
+              </p>
+            </div>
+            <div className="hidden lg:flex items-center gap-2">
+              {getActiveFilterCount() > 0 && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
+                  <span className="text-sm font-semibold">{getActiveFilterCount()} filters active</span>
+                  <button onClick={clearAllFilters} className="text-blue-600 hover:text-blue-800">
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <SkeletonLoader count={6} />
+        ) : filteredProperties.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredProperties.map((property, index) => (
+              <PropertyCard 
+                key={index} 
+                property={property}
+                onCardClick={(prop) => {
+                  console.log('Property clicked:', prop)
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+              <SearchIcon size={48} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No properties found</h3>
+            <p className="text-gray-600 mb-4">Try adjusting your filters to see more results</p>
+            <button
+              onClick={clearAllFilters}
+              className="px-6 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Clear All Filters
+            </button>
+          </div>
+        )}
+      </div>
     </div>
-  );
-};export default Search;
+  )
+}
+
+export default Search
