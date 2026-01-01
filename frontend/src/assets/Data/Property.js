@@ -575,7 +575,7 @@ const propertyData = [
       "swimming-pool",
       "garden",
       "security",
-      "power-backup",
+      "power-backup", 
       "lift",
       "club-house",
     ],
