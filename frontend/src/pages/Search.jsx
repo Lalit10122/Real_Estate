@@ -4,7 +4,6 @@ import PriceRangeSlider from '../components/PriceRangeSlider'
 import LocationSelector from '../components/LocationSelector'
 import BedroomBathroomSelector from '../components/BedroomBathroomSelector'
 import AreaRangeSlider from '../components/AreaRangeSlider'
-import AmenitiesSelector from '../components/AmenitiesSelector'
 import FeaturesSelector from '../components/FeaturesSelector'
 import PropertyToggles from '../components/PropertyToggles'
 import PropertyCard from '../components/PropertyCard'
@@ -26,7 +25,6 @@ const Search = () => {
   const [bathRooms, setbathRooms] = useState([])
   const [startArea, setstartArea] = useState("")
   const [endArea, setendArea] = useState("")
-  const [aminities, setaminities] = useState([])
 
   // Features
   const [furnishingStatus, setfurnishingStatus] = useState("")
@@ -46,13 +44,23 @@ const Search = () => {
   const [isLocationShown, setisLocationShown] = useState(false)
   const [isbedroomShown, setisbedroomShown] = useState(false)
   const [isAreaShown, setisAreaShown] = useState(false)
-  const [isAminitiesShown, setisAminitiesShown] = useState(false)
   const [isFeaturesShown, setisFeaturesShown] = useState(false)
 
   // Search Results States
   const [filteredProperties, setFilteredProperties] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [showMobileFilter, setShowMobileFilter] = useState(false)
+
+  // Check if any filters are active (excluding default city filter)
+  const hasActiveFilters = () => {
+    return propertyType || startPriceRange || endPriceRange || 
+           state || city || area || pinCode || 
+           bedRooms.length > 0 || bathRooms.length > 0 || 
+           startArea || endArea || 
+           furnishingStatus || possessionStatus || propertyAge || 
+           facingDirection || igVerifiedProperty || isFeaturedProperty || 
+           isParking || immediatelyAvailable;
+  }
 
   // Filter Properties
   const filterProperties = () => {
@@ -61,10 +69,22 @@ const Search = () => {
     setTimeout(() => {
       let results = [...propertyData]
 
+      // Filter by listing type (Buy/Rent)
       results = results.filter(property => 
         property.listingType === (isBuy ? 'sell' : 'rent')
       )
 
+      // If no filters are active, show first 10 properties from Jaipur
+      if (!hasActiveFilters()) {
+        const jaipurProperties = results.filter(property => 
+          property.location.city === 'Jaipur'
+        );
+        setFilteredProperties(jaipurProperties.slice(0, 10));
+        setIsLoading(false);
+        return;
+      }
+
+      // Apply all filters
       if (propertyType) {
         results = results.filter(property => 
           property.propertyType === propertyType
@@ -115,14 +135,6 @@ const Search = () => {
           const maxArea = endArea || Infinity
           return propertyArea >= minArea && propertyArea <= maxArea
         })
-      }
-
-      if (aminities.length > 0) {
-        results = results.filter(property => 
-          aminities.every(amenity => 
-            property.amenities?.includes(amenity)
-          )
-        )
       }
 
       if (furnishingStatus) {
@@ -180,7 +192,7 @@ const Search = () => {
   }, [
     isBuy, propertyType, startPriceRange, endPriceRange, 
     state, city, area, pinCode, bedRooms, bathRooms,
-    startArea, endArea, aminities, furnishingStatus,
+    startArea, endArea, furnishingStatus,
     possessionStatus, propertyAge, facingDirection,
     igVerifiedProperty, isFeaturedProperty, isParking, immediatelyAvailable
   ])
@@ -198,7 +210,6 @@ const Search = () => {
     setbathRooms([])
     setstartArea("")
     setendArea("")
-    setaminities([])
     setfurnishingStatus("")
     setpossessionStatus("")
     setpropertyAge("")
@@ -217,7 +228,6 @@ const Search = () => {
     if (bedRooms.length > 0) count++
     if (bathRooms.length > 0) count++
     if (startArea || endArea) count++
-    if (aminities.length > 0) count++
     if (furnishingStatus) count++
     if (possessionStatus) count++
     if (propertyAge) count++
@@ -359,25 +369,6 @@ const Search = () => {
           </div>
           <div className={`${isAreaShown ? 'p-2' : 'hidden'}`}>
             <AreaRangeSlider setstartArea={setstartArea} setendArea={setendArea} startArea={startArea} endArea={endArea} />
-          </div>
-        </div>
-
-        {/* Amenities */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
-              <Trees size={16} />
-              <h3>Select Amenities</h3>
-            </div>
-            <div onClick={() => setisAminitiesShown(!isAminitiesShown)}>
-              {isAminitiesShown ? <ChevronUp /> : <ChevronDown />}
-            </div>
-          </div>
-          <div className={`${isAminitiesShown ? 'p-2' : 'hidden'}`}>
-            <AmenitiesSelector
-              amenities={aminities}
-              setAmenities={setaminities}
-            />
           </div>
         </div>
 
@@ -579,25 +570,6 @@ const Search = () => {
                 </div>
               </div>
 
-              {/* Amenities */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
-                    <Trees size={16} />
-                    <h3 className='text-sm font-semibold'>Amenities</h3>
-                  </div>
-                  <div onClick={() => setisAminitiesShown(!isAminitiesShown)}>
-                    {isAminitiesShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  </div>
-                </div>
-                <div className={`${isAminitiesShown ? 'mt-2' : 'hidden'}`}>
-                  <AmenitiesSelector
-                    amenities={aminities}
-                    setAmenities={setaminities}
-                  />
-                </div>
-              </div>
-
               {/* Features */}
               <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
                 <div className='flex gap-2 items-center justify-between mb-2'>
@@ -669,7 +641,11 @@ const Search = () => {
                 {isBuy ? 'Properties for Sale' : 'Properties for Rent'}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {isLoading ? 'Searching...' : `${filteredProperties.length} properties found`}
+                {isLoading ? 'Searching...' : 
+                 hasActiveFilters() ? 
+                   `${filteredProperties.length} properties found` :
+                   `Showing ${filteredProperties.length} properties in Jaipur`
+                }
               </p>
             </div>
             <div className="hidden lg:flex items-center gap-2">
@@ -683,6 +659,15 @@ const Search = () => {
               )}
             </div>
           </div>
+
+          {/* Info Message when no filters are active */}
+          {!hasActiveFilters() && !isLoading && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">📍 Jaipur Properties:</span> Showing all available properties in Jaipur. Apply filters to refine your search.
+              </p>
+            </div>
+          )}
         </div>
 
         {isLoading ? (
@@ -691,7 +676,7 @@ const Search = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredProperties.map((property, index) => (
               <PropertyCard 
-                key={index} 
+                key={property.id || index} 
                 property={property}
                 onCardClick={(prop) => {
                   console.log('Property clicked:', prop)

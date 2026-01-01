@@ -1,8 +1,10 @@
 
 
+
+
 const propertyData = [
   {
-    id:1,
+    id: 1,
     description: "Spacious 3BHK apartment with modern amenities...",
     propertyType: "flat",
     listingType: "sell",
@@ -44,10 +46,9 @@ const propertyData = [
         open: 1,
       },
       balconies: 2,
-      age: "2-5 years",
+      age: "2-5",
       possession: "ready-to-move",
     },
-    // location detail/
     location: {
       address: "Sector 34, BKC Tower",
       area: "Vaishali Nagar",
@@ -55,14 +56,10 @@ const propertyData = [
       state: "Rajasthan",
       pincode: "302021",
       landmark: "Near Phoenix Mall",
-
-      // Geospatial coordinates for map
       coordinates: {
         lat: 26.9124,
         lng: 75.7873,
       },
-
-      // Nearby places
       nearby: {
         schools: ["DPS School - 1.2km", "Ryan International - 2km"],
         hospitals: ["Fortis Hospital - 3km"],
@@ -70,127 +67,433 @@ const propertyData = [
         metro: "Mansarovar Metro - 2.5km",
       },
     },
-
-    // media details
     images: [
       {
         url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
         isPrimary: true,
         caption: "Living Room",
       },
-      {
-        url: "https://...",
-        isPrimary: false,
-        caption: "Bedroom",
-      },
-      // ... more images
     ],
-    video: {
-      url: "https://youtube.com/...",
-      thumbnail: "https://...",
-    },
-
-    documents: [
-      {
-        type: "title-deed",
-        url: "https://...",
-        verified: true,
-      },
-    ],
-
-    // status
-    status: "active", // "sold", "rented", "pending", "inactive"
+    status: "active",
     availability: {
       available: true,
       availableFrom: "2024-01-01",
       immediatelyAvailable: true,
     },
-
-    // for featured /listings
     isFeatured: true,
     isVerified: true,
     isPremium: false,
-    featuredUntil: "2024-12-31",
-
-    // matricis
     metrics: {
       views: 245,
       favorites: 45,
       inquiries: 12,
-      lastViewed: "2024-12-30T10:30:00Z",
       trending: true,
     },
-
-    // Timestamps & Metadata
-    timestamps: {
-      createdAt: "2024-11-01T00:00:00Z",
-      updatedAt: "2024-12-30T00:00:00Z",
-      publishedAt: "2024-11-02T00:00:00Z",
-      expiresAt: "2025-12-31T23:59:59Z",
-    },
-
-    // title and description
-    seo: {
-      slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
-      metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
-      metaDescription: "Spacious 3BHK apartment...",
-    },
-
-    // Additional Property-Specific Fields
-    // For Flats/Apartments:
     apartment: {
       societyName: "Prestige Gardens",
       towerBlock: "Tower A",
       maintenanceCharges: 3500,
       maintenanceFrequency: "monthly",
     },
-    // For plots
+  },
+  {
+    id: 2,
+    description: "Luxurious 4BHK villa with private garden and pool",
+    propertyType: "villa",
+    listingType: "sell",
+    area: {
+      value: 3200,
+      unit: "sqft",
+    },
+    price: {
+      amount: 25000000,
+      display: "2.5Cr",
+      negotiable: true,
+      pricePerSqft: 7812,
+    },
+    owner: {
+      id: "user_456",
+      name: "Priya Sharma",
+      phone: "+91-9876543211",
+      email: "priya@example.com",
+      verified: true,
+      type: "owner",
+    },
+    amenities: [
+      "parking",
+      "gym",
+      "swimming-pool",
+      "garden",
+      "security",
+      "power-backup",
+      "club-house",
+      "wifi",
+    ],
+    features: {
+      furnished: "furnished",
+      facing: "north",
+      floorNumber: 0,
+      totalFloors: 3,
+      parking: {
+        covered: 2,
+        open: 2,
+      },
+      balconies: 4,
+      age: "0-1",
+      possession: "ready-to-move",
+    },
+    location: {
+      address: "Plot 12, Royal Enclave",
+      area: "Malviya Nagar",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302017",
+      landmark: "Near Central Park",
+      coordinates: {
+        lat: 26.8467,
+        lng: 75.8056,
+      },
+      nearby: {
+        schools: ["St. Xavier's - 1km"],
+        hospitals: ["Apex Hospital - 2km"],
+        malls: ["World Trade Park - 3km"],
+        metro: "Jawahar Circle Metro - 4km",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+        isPrimary: true,
+        caption: "Villa Front View",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-02-01",
+      immediatelyAvailable: true,
+    },
+    isFeatured: true,
+    isVerified: true,
+    isPremium: true,
+    metrics: {
+      views: 512,
+      favorites: 89,
+      inquiries: 23,
+      trending: true,
+    },
+    villa: {
+      floors: 3,
+      servants_quarters: true,
+      garden: true,
+      gardenArea: "1200 sqft",
+    },
+  },
+  {
+    id: 3,
+    description: "2BHK apartment for rent in prime location",
+    propertyType: "flat",
+    listingType: "rent",
+    area: {
+      value: 950,
+      unit: "sqft",
+    },
+    price: {
+      amount: 25000,
+      display: "25K",
+      negotiable: false,
+      pricePerSqft: 26,
+    },
+    owner: {
+      id: "user_789",
+      name: "Rahul Verma",
+      phone: "+91-9876543212",
+      email: "rahul@example.com",
+      verified: true,
+      type: "owner",
+    },
+    amenities: [
+      "parking",
+      "gym",
+      "security",
+      "power-backup",
+      "lift",
+    ],
+    features: {
+      furnished: "semi-furnished",
+      facing: "south",
+      floorNumber: 3,
+      totalFloors: 8,
+      parking: {
+        covered: 1,
+        open: 0,
+      },
+      balconies: 1,
+      age: "1-5",
+      possession: "ready-to-move",
+    },
+    location: {
+      address: "Block C, Green Heights",
+      area: "C-Scheme",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302001",
+      landmark: "Near Birla Mandir",
+      coordinates: {
+        lat: 26.9033,
+        lng: 75.7873,
+      },
+      nearby: {
+        schools: ["Modern School - 800m"],
+        hospitals: ["SMS Hospital - 1.5km"],
+        malls: ["Gaurav Tower - 500m"],
+        metro: "Chandpole Metro - 1km",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800",
+        isPrimary: true,
+        caption: "Living Area",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-01-15",
+      immediatelyAvailable: true,
+    },
+    isFeatured: false,
+    isVerified: true,
+    isPremium: false,
+    metrics: {
+      views: 178,
+      favorites: 34,
+      inquiries: 8,
+      trending: false,
+    },
+    apartment: {
+      societyName: "Green Heights Society",
+      towerBlock: "Block C",
+      maintenanceCharges: 2000,
+      maintenanceFrequency: "monthly",
+    },
+    rental: {
+      monthlyRent: 25000,
+      securityDeposit: 75000,
+      maintenanceIncluded: true,
+      preferredTenants: "family",
+      leaseDuration: "11 months minimum",
+      availableFor: "longterm",
+    },
+  },
+  {
+    id: 4,
+    description: "Commercial plot in prime business district",
+    propertyType: "plot",
+    listingType: "sell",
+    area: {
+      value: 2400,
+      unit: "sqft",
+    },
+    price: {
+      amount: 18000000,
+      display: "1.8Cr",
+      negotiable: true,
+      pricePerSqft: 7500,
+    },
+    owner: {
+      id: "user_101",
+      name: "Amit Patel",
+      phone: "+91-9876543213",
+      email: "amit@example.com",
+      verified: true,
+      type: "owner",
+    },
+    amenities: [
+      "security",
+      "power-backup",
+    ],
+    features: {
+      furnished: "unfurnished",
+      facing: "east",
+      floorNumber: 0,
+      totalFloors: 0,
+      parking: {
+        covered: 0,
+        open: 3,
+      },
+      balconies: 0,
+      age: "0-1",
+      possession: "ready-to-move",
+    },
+    location: {
+      address: "Plot 45, Sector 12",
+      area: "Ajmer Road",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302006",
+      landmark: "Near Jaipur International Airport",
+      coordinates: {
+        lat: 26.8242,
+        lng: 75.8120,
+      },
+      nearby: {
+        schools: ["Delhi Public School - 2km"],
+        hospitals: ["CK Birla Hospital - 3km"],
+        malls: ["Crystal Palm Mall - 1km"],
+        metro: "Airport Metro - 2km",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+        isPrimary: true,
+        caption: "Plot View",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-01-01",
+      immediatelyAvailable: true,
+    },
+    isFeatured: true,
+    isVerified: true,
+    isPremium: false,
+    metrics: {
+      views: 423,
+      favorites: 67,
+      inquiries: 19,
+      trending: true,
+    },
     plot: {
       plotNumber: "45",
       dimensions: "40x60 feet",
       boundaryWall: true,
-      cornerPlot: false,
-      roadWidth: "30 feet",
+      cornerPlot: true,
+      roadWidth: "60 feet",
       facingRoad: true,
     },
-    // For villas
-    villa: {
-      floors: 2,
-      servants_quarters: true,
-      garden: true,
-      gardenArea: "500 sqft",
-    },
-
-    //  Rental-Specific Fields (if listingType: "rent")
-    rental: {
-      monthlyRent: 35000,
-      securityDeposit: 105000, // Usually 3 months
-      maintenanceIncluded: false,
-      preferredTenants: "family", // "bachelor", "company"
-      leaseDuration: "11 months minimum",
-      availableFor: "longterm", // "shortterm"
-    },
   },
-   {
-    id:2,
-    description: "Spacious 3BHK apartment with modern amenities...",
+  {
+    id: 5,
+    description: "Modern 1BHK apartment for bachelors",
     propertyType: "flat",
-    listingType: "sell",
+    listingType: "rent",
     area: {
-      value: 1450,
+      value: 650,
       unit: "sqft",
     },
     price: {
-      amount: 7500000,
-      display: "75L",
+      amount: 15000,
+      display: "15K",
       negotiable: true,
-      pricePerSqft: 5172,
+      pricePerSqft: 23,
     },
     owner: {
-      id: "user_123",
-      name: "John Doe",
-      phone: "+91-9876543210",
-      email: "john@example.com",
+      id: "user_202",
+      name: "Sanjay Kumar",
+      phone: "+91-9876543214",
+      email: "sanjay@example.com",
+      verified: false,
+      type: "agent",
+    },
+    amenities: [
+      "parking",
+      "security",
+      "power-backup",
+      "lift",
+      "wifi",
+    ],
+    features: {
+      furnished: "furnished",
+      facing: "west",
+      floorNumber: 2,
+      totalFloors: 5,
+      parking: {
+        covered: 0,
+        open: 1,
+      },
+      balconies: 1,
+      age: "5-10",
+      possession: "ready-to-move",
+    },
+    location: {
+      address: "Apartment 203, Tech Park Residency",
+      area: "Jagatpura",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302017",
+      landmark: "Near Infosys Campus",
+      coordinates: {
+        lat: 26.8360,
+        lng: 75.8648,
+      },
+      nearby: {
+        schools: ["Seedling School - 1.5km"],
+        hospitals: ["Mahatma Gandhi Hospital - 2km"],
+        malls: ["Fun Cinemas Mall - 3km"],
+        metro: "Not Available",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800",
+        isPrimary: true,
+        caption: "Compact Living",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-01-20",
+      immediatelyAvailable: false,
+    },
+    isFeatured: false,
+    isVerified: false,
+    isPremium: false,
+    metrics: {
+      views: 92,
+      favorites: 12,
+      inquiries: 5,
+      trending: false,
+    },
+    apartment: {
+      societyName: "Tech Park Residency",
+      towerBlock: "Block A",
+      maintenanceCharges: 1500,
+      maintenanceFrequency: "monthly",
+    },
+    rental: {
+      monthlyRent: 15000,
+      securityDeposit: 30000,
+      maintenanceIncluded: false,
+      preferredTenants: "bachelor",
+      leaseDuration: "11 months minimum",
+      availableFor: "longterm",
+    },
+  },
+  {
+    id: 6,
+    description: "Premium 5BHK penthouse with terrace garden",
+    propertyType: "flat",
+    listingType: "sell",
+    area: {
+      value: 4500,
+      unit: "sqft",
+    },
+    price: {
+      amount: 45000000,
+      display: "4.5Cr",
+      negotiable: false,
+      pricePerSqft: 10000,
+    },
+    owner: {
+      id: "user_303",
+      name: "Neha Malhotra",
+      phone: "+91-9876543215",
+      email: "neha@example.com",
       verified: true,
       type: "owner",
     },
@@ -203,163 +506,270 @@ const propertyData = [
       "power-backup",
       "lift",
       "club-house",
+      "wifi",
+      "park",
     ],
     features: {
-      furnished: "semi-furnished",
-      facing: "east",
-      floorNumber: 5,
-      totalFloors: 12,
+      furnished: "furnished",
+      facing: "north-east",
+      floorNumber: 15,
+      totalFloors: 15,
       parking: {
-        covered: 1,
+        covered: 3,
         open: 1,
       },
-      balconies: 2,
-      age: "2-5 years",
+      balconies: 5,
+      age: "0-1",
       possession: "ready-to-move",
     },
-    // location detail/
     location: {
-      address: "Sector 34, BKC Tower",
-      area: "Vaishali Nagar",
+      address: "Penthouse, Sky Towers",
+      area: "Raja Park",
       city: "Jaipur",
       state: "Rajasthan",
-      pincode: "302021",
-      landmark: "Near Phoenix Mall",
-
-      // Geospatial coordinates for map
+      pincode: "302004",
+      landmark: "Near Jaipur Railway Station",
       coordinates: {
-        lat: 26.9124,
-        lng: 75.7873,
+        lat: 26.9154,
+        lng: 75.7870,
       },
-
-      // Nearby places
       nearby: {
-        schools: ["DPS School - 1.2km", "Ryan International - 2km"],
-        hospitals: ["Fortis Hospital - 3km"],
-        malls: ["Phoenix Mall - 500m"],
-        metro: "Mansarovar Metro - 2.5km",
+        schools: ["Mayo College - 2km"],
+        hospitals: ["Eternal Heart Care - 1km"],
+        malls: ["Triton Mall - 1.5km"],
+        metro: "Sindhi Camp Metro - 800m",
       },
     },
-
-    // media details
     images: [
       {
-        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+        url: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800",
         isPrimary: true,
-        caption: "Living Room",
-      },
-      {
-        url: "https://...",
-        isPrimary: false,
-        caption: "Bedroom",
-      },
-      // ... more images
-    ],
-    video: {
-      url: "https://youtube.com/...",
-      thumbnail: "https://...",
-    },
-
-    documents: [
-      {
-        type: "title-deed",
-        url: "https://...",
-        verified: true,
+        caption: "Penthouse View",
       },
     ],
-
-    // status
-    status: "active", // "sold", "rented", "pending", "inactive"
+    status: "active",
     availability: {
       available: true,
-      availableFrom: "2024-01-01",
-      immediatelyAvailable: true,
+      availableFrom: "2024-03-01",
+      immediatelyAvailable: false,
     },
-
-    // for featured /listings
     isFeatured: true,
     isVerified: true,
-    isPremium: false,
-    featuredUntil: "2024-12-31",
-
-    // matricis
+    isPremium: true,
     metrics: {
-      views: 245,
-      favorites: 45,
-      inquiries: 12,
-      lastViewed: "2024-12-30T10:30:00Z",
+      views: 1245,
+      favorites: 234,
+      inquiries: 56,
       trending: true,
     },
-
-    // Timestamps & Metadata
-    timestamps: {
-      createdAt: "2024-11-01T00:00:00Z",
-      updatedAt: "2024-12-30T00:00:00Z",
-      publishedAt: "2024-11-02T00:00:00Z",
-      expiresAt: "2025-12-31T23:59:59Z",
-    },
-
-    // title and description
-    seo: {
-      slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
-      metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
-      metaDescription: "Spacious 3BHK apartment...",
-    },
-
-    // Additional Property-Specific Fields
-    // For Flats/Apartments:
     apartment: {
-      societyName: "Prestige Gardens",
-      towerBlock: "Tower A",
-      maintenanceCharges: 3500,
+      societyName: "Sky Towers Premium",
+      towerBlock: "Tower A - Penthouse",
+      maintenanceCharges: 12000,
       maintenanceFrequency: "monthly",
     },
-    // For plots
-    plot: {
-      plotNumber: "45",
-      dimensions: "40x60 feet",
-      boundaryWall: true,
-      cornerPlot: false,
-      roadWidth: "30 feet",
-      facingRoad: true,
-    },
-    // For villas
-    villa: {
-      floors: 2,
-      servants_quarters: true,
-      garden: true,
-      gardenArea: "500 sqft",
-    },
-
-    //  Rental-Specific Fields (if listingType: "rent")
-    rental: {
-      monthlyRent: 35000,
-      securityDeposit: 105000, // Usually 3 months
-      maintenanceIncluded: false,
-      preferredTenants: "family", // "bachelor", "company"
-      leaseDuration: "11 months minimum",
-      availableFor: "longterm", // "shortterm"
-    },
   },
-   {
-    description: "Spacious 3BHK apartment with modern amenities...",
+  {
+    id: 7,
+    description: "Affordable 2BHK flat in developing area",
     propertyType: "flat",
     listingType: "sell",
     area: {
-      value: 1450,
+      value: 850,
       unit: "sqft",
     },
     price: {
-      amount: 7500000,
-      display: "75L",
+      amount: 3500000,
+      display: "35L",
       negotiable: true,
-      pricePerSqft: 5172,
+      pricePerSqft: 4117,
     },
     owner: {
-      id: "user_123",
-      name: "John Doe",
-      phone: "+91-9876543210",
-      email: "john@example.com",
+      id: "user_404",
+      name: "Vikram Singh",
+      phone: "+91-9876543216",
+      email: "vikram@example.com",
+      verified: true,
+      type: "owner",
+    },
+    amenities: [
+      "parking",
+      "security",
+      "power-backup",
+      "lift",
+    ],
+    features: {
+      furnished: "unfurnished",
+      facing: "south-west",
+      floorNumber: 1,
+      totalFloors: 4,
+      parking: {
+        covered: 1,
+        open: 0,
+      },
+      balconies: 1,
+      age: "1-5",
+      possession: "under-construction",
+    },
+    location: {
+      address: "Flat 101, Sunrise Apartments",
+      area: "Sanganer",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302029",
+      landmark: "Near Sanganer Airport",
+      coordinates: {
+        lat: 26.8173,
+        lng: 75.8070,
+      },
+      nearby: {
+        schools: ["Maheshwari Public School - 1km"],
+        hospitals: ["Sawai Man Singh Hospital - 4km"],
+        malls: ["Pink Square Mall - 5km"],
+        metro: "Not Available",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800",
+        isPrimary: true,
+        caption: "Construction Progress",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-06-01",
+      immediatelyAvailable: false,
+    },
+    isFeatured: false,
+    isVerified: true,
+    isPremium: false,
+    metrics: {
+      views: 156,
+      favorites: 28,
+      inquiries: 11,
+      trending: false,
+    },
+    apartment: {
+      societyName: "Sunrise Residency",
+      towerBlock: "Block B",
+      maintenanceCharges: 1800,
+      maintenanceFrequency: "monthly",
+    },
+  },
+  {
+    id: 8,
+    description: "Commercial office space in IT park",
+    propertyType: "commercial",
+    listingType: "rent",
+    area: {
+      value: 2000,
+      unit: "sqft",
+    },
+    price: {
+      amount: 80000,
+      display: "80K",
+      negotiable: true,
+      pricePerSqft: 40,
+    },
+    owner: {
+      id: "user_505",
+      name: "Rajesh Agarwal",
+      phone: "+91-9876543217",
+      email: "rajesh@example.com",
+      verified: true,
+      type: "owner",
+    },
+    amenities: [
+      "parking",
+      "security",
+      "power-backup",
+      "lift",
+      "wifi",
+    ],
+    features: {
+      furnished: "furnished",
+      facing: "north",
+      floorNumber: 4,
+      totalFloors: 10,
+      parking: {
+        covered: 5,
+        open: 10,
+      },
+      balconies: 0,
+      age: "0-1",
+      possession: "ready-to-move",
+    },
+    location: {
+      address: "4th Floor, IT Tower",
+      area: "Sitapura",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302022",
+      landmark: "Near RIICO Industrial Area",
+      coordinates: {
+        lat: 26.7808,
+        lng: 75.8648,
+      },
+      nearby: {
+        schools: ["MPS International - 3km"],
+        hospitals: ["Metro MAS Hospital - 2km"],
+        malls: ["Elements Mall - 8km"],
+        metro: "Not Available",
+      },
+    },
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+        isPrimary: true,
+        caption: "Office Space",
+      },
+    ],
+    status: "active",
+    availability: {
+      available: true,
+      availableFrom: "2024-02-01",
+      immediatelyAvailable: true,
+    },
+    isFeatured: true,
+    isVerified: true,
+    isPremium: false,
+    metrics: {
+      views: 334,
+      favorites: 45,
+      inquiries: 18,
+      trending: false,
+    },
+    rental: {
+      monthlyRent: 80000,
+      securityDeposit: 240000,
+      maintenanceIncluded: false,
+      preferredTenants: "company",
+      leaseDuration: "3 years minimum",
+      availableFor: "longterm",
+    },
+  },
+  {
+    id: 9,
+    description: "Spacious 3BHK independent villa with private pool",
+    propertyType: "villa",
+    listingType: "rent",
+    area: {
+      value: 2800,
+      unit: "sqft",
+    },
+    price: {
+      amount: 60000,
+      display: "60K",
+      negotiable: true,
+      pricePerSqft: 21,
+    },
+    owner: {
+      id: "user_606",
+      name: "Divya Joshi",
+      phone: "+91-9876543218",
+      email: "divya@example.com",
       verified: true,
       type: "owner",
     },
@@ -370,315 +780,343 @@ const propertyData = [
       "garden",
       "security",
       "power-backup",
-      "lift",
-      "club-house",
+      "wifi",
     ],
     features: {
       furnished: "semi-furnished",
       facing: "east",
-      floorNumber: 5,
-      totalFloors: 12,
+      floorNumber: 0,
+      totalFloors: 2,
       parking: {
-        covered: 1,
-        open: 1,
+        covered: 2,
+        open: 2,
       },
-      balconies: 2,
-      age: "2-5 years",
+      balconies: 3,
+      age: "1-5",
       possession: "ready-to-move",
     },
-    // location detail/
     location: {
-      address: "Sector 34, BKC Tower",
-      area: "Vaishali Nagar",
+      address: "Villa 23, Palm Grove",
+      area: "Mansarovar",
       city: "Jaipur",
       state: "Rajasthan",
-      pincode: "302021",
-      landmark: "Near Phoenix Mall",
-
-      // Geospatial coordinates for map
+      pincode: "302020",
+      landmark: "Near JDA Approved Colony",
       coordinates: {
-        lat: 26.9124,
-        lng: 75.7873,
+        lat: 26.8514,
+        lng: 75.7374,
       },
-
-      // Nearby places
       nearby: {
-        schools: ["DPS School - 1.2km", "Ryan International - 2km"],
-        hospitals: ["Fortis Hospital - 3km"],
-        malls: ["Phoenix Mall - 500m"],
-        metro: "Mansarovar Metro - 2.5km",
+        schools: ["Neerja Modi School - 1km"],
+        hospitals: ["Manipal Hospital - 2.5km"],
+        malls: ["Elements Mall - 4km"],
+        metro: "Mansarovar Metro - 1.5km",
       },
     },
-
-    // media details
     images: [
       {
-        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+        url: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800",
         isPrimary: true,
-        caption: "Living Room",
-      },
-      {
-        url: "https://...",
-        isPrimary: false,
-        caption: "Bedroom",
-      },
-      // ... more images
-    ],
-    video: {
-      url: "https://youtube.com/...",
-      thumbnail: "https://...",
-    },
-
-    documents: [
-      {
-        type: "title-deed",
-        url: "https://...",
-        verified: true,
+        caption: "Villa Exterior",
       },
     ],
-
-    // status
-    status: "active", // "sold", "rented", "pending", "inactive"
+    status: "active",
     availability: {
       available: true,
-      availableFrom: "2024-01-01",
-      immediatelyAvailable: true,
+      availableFrom: "2024-02-15",
+      immediatelyAvailable: false,
     },
-
-    // for featured /listings
     isFeatured: true,
     isVerified: true,
     isPremium: false,
-    featuredUntil: "2024-12-31",
-
-    // matricis
     metrics: {
-      views: 245,
-      favorites: 45,
-      inquiries: 12,
-      lastViewed: "2024-12-30T10:30:00Z",
+      views: 567,
+      favorites: 98,
+      inquiries: 34,
       trending: true,
     },
-
-    // Timestamps & Metadata
-    timestamps: {
-      createdAt: "2024-11-01T00:00:00Z",
-      updatedAt: "2024-12-30T00:00:00Z",
-      publishedAt: "2024-11-02T00:00:00Z",
-      expiresAt: "2025-12-31T23:59:59Z",
-    },
-
-    // title and description
-    seo: {
-      slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
-      metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
-      metaDescription: "Spacious 3BHK apartment...",
-    },
-
-    // Additional Property-Specific Fields
-    // For Flats/Apartments:
-    apartment: {
-      societyName: "Prestige Gardens",
-      towerBlock: "Tower A",
-      maintenanceCharges: 3500,
-      maintenanceFrequency: "monthly",
-    },
-    // For plots
-    plot: {
-      plotNumber: "45",
-      dimensions: "40x60 feet",
-      boundaryWall: true,
-      cornerPlot: false,
-      roadWidth: "30 feet",
-      facingRoad: true,
-    },
-    // For villas
     villa: {
       floors: 2,
       servants_quarters: true,
       garden: true,
-      gardenArea: "500 sqft",
+      gardenArea: "800 sqft",
     },
-
-    //  Rental-Specific Fields (if listingType: "rent")
     rental: {
-      monthlyRent: 35000,
-      securityDeposit: 105000, // Usually 3 months
+      monthlyRent: 60000,
+      securityDeposit: 180000,
       maintenanceIncluded: false,
-      preferredTenants: "family", // "bachelor", "company"
+      preferredTenants: "family",
       leaseDuration: "11 months minimum",
-      availableFor: "longterm", // "shortterm"
+      availableFor: "longterm",
     },
   },
-   {
-    description: "Spacious 3BHK apartment with modern amenities...",
-    propertyType: "flat",
+  {
+    id: 10,
+    description: "Prime residential plot in gated community",
+    propertyType: "plot",
     listingType: "sell",
     area: {
-      value: 1450,
+      value: 1800,
       unit: "sqft",
     },
     price: {
-      amount: 7500000,
-      display: "75L",
+      amount: 9000000,
+      display: "90L",
       negotiable: true,
-      pricePerSqft: 5172,
+      pricePerSqft: 5000,
     },
     owner: {
-      id: "user_123",
-      name: "John Doe",
-      phone: "+91-9876543210",
-      email: "john@example.com",
+      id: "user_707",
+      name: "Karan Mehta",
+      phone: "+91-9876543219",
+      email: "karan@example.com",
       verified: true,
       type: "owner",
     },
     amenities: [
-      "parking",
-      "gym",
-      "swimming-pool",
+      "park",
       "garden",
       "security",
-      "power-backup", 
-      "lift",
-      "club-house",
+      "power-backup",
     ],
     features: {
-      furnished: "semi-furnished",
-      facing: "east",
-      floorNumber: 5,
-      totalFloors: 12,
+      furnished: "unfurnished",
+      facing: "north-west",
+      floorNumber: 0,
+      totalFloors: 0,
       parking: {
-        covered: 1,
-        open: 1,
+        covered: 0,
+        open: 2,
       },
-      balconies: 2,
-      age: "2-5 years",
+      balconies: 0,
+      age: "0-1",
       possession: "ready-to-move",
     },
-    // location detail/
     location: {
-      address: "Sector 34, BKC Tower",
-      area: "Vaishali Nagar",
+      address: "Plot 78, Royal Gardens",
+      area: "Tonk Road",
       city: "Jaipur",
       state: "Rajasthan",
-      pincode: "302021",
-      landmark: "Near Phoenix Mall",
-
-      // Geospatial coordinates for map
+      pincode: "302018",
+      landmark: "Near Durgapura Railway Station",
       coordinates: {
-        lat: 26.9124,
-        lng: 75.7873,
+        lat: 26.8512,
+        lng: 75.8044,
       },
-
-      // Nearby places
       nearby: {
-        schools: ["DPS School - 1.2km", "Ryan International - 2km"],
-        hospitals: ["Fortis Hospital - 3km"],
-        malls: ["Phoenix Mall - 500m"],
-        metro: "Mansarovar Metro - 2.5km",
+        schools: ["St. Anselm's School - 2km"],
+        hospitals: ["Jaipur Golden Hospital - 3km"],
+        malls: ["Celebration Mall - 5km"],
+        metro: "Durgapura Metro - 1km",
       },
     },
-
-    // media details
     images: [
       {
-        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+        url: "https://images.unsplash.com/photo-1464146072230-91cabc968266?w=800",
         isPrimary: true,
-        caption: "Living Room",
-      },
-      {
-        url: "https://...",
-        isPrimary: false,
-        caption: "Bedroom",
-      },
-      // ... more images
-    ],
-    video: {
-      url: "https://youtube.com/...",
-      thumbnail: "https://...",
-    },
-
-    documents: [
-      {
-        type: "title-deed",
-        url: "https://...",
-        verified: true,
+        caption: "Plot Landscape",
       },
     ],
-
-    // status
-    status: "active", // "sold", "rented", "pending", "inactive"
+    status: "active",
     availability: {
       available: true,
       availableFrom: "2024-01-01",
       immediatelyAvailable: true,
     },
-
-    // for featured /listings
-    isFeatured: true,
+    isFeatured: false,
     isVerified: true,
     isPremium: false,
-    featuredUntil: "2024-12-31",
-
-    // matricis
     metrics: {
-      views: 245,
-      favorites: 45,
-      inquiries: 12,
-      lastViewed: "2024-12-30T10:30:00Z",
-      trending: true,
+      views: 289,
+      favorites: 52,
+      inquiries: 15,
+      trending: false,
     },
-
-    // Timestamps & Metadata
-    timestamps: {
-      createdAt: "2024-11-01T00:00:00Z",
-      updatedAt: "2024-12-30T00:00:00Z",
-      publishedAt: "2024-11-02T00:00:00Z",
-      expiresAt: "2025-12-31T23:59:59Z",
-    },
-
-    // title and description
-    seo: {
-      slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
-      metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
-      metaDescription: "Spacious 3BHK apartment...",
-    },
-
-    // Additional Property-Specific Fields
-    // For Flats/Apartments:
-    apartment: {
-      societyName: "Prestige Gardens",
-      towerBlock: "Tower A",
-      maintenanceCharges: 3500,
-      maintenanceFrequency: "monthly",
-    },
-    // For plots
     plot: {
-      plotNumber: "45",
-      dimensions: "40x60 feet",
-      boundaryWall: true,
+      plotNumber: "78",
+      dimensions: "30x60 feet",
+      boundaryWall: false,
       cornerPlot: false,
-      roadWidth: "30 feet",
+      roadWidth: "40 feet",
       facingRoad: true,
-    },
-    // For villas
-    villa: {
-      floors: 2,
-      servants_quarters: true,
-      garden: true,
-      gardenArea: "500 sqft",
-    },
-
-    //  Rental-Specific Fields (if listingType: "rent")
-    rental: {
-      monthlyRent: 35000,
-      securityDeposit: 105000, // Usually 3 months
-      maintenanceIncluded: false,
-      preferredTenants: "family", // "bachelor", "company"
-      leaseDuration: "11 months minimum",
-      availableFor: "longterm", // "shortterm"
     },
   },
 ];
 
 export default propertyData;
+
+// const propertyData = [
+//   {
+//     id:1,
+//     description: "Spacious 3BHK apartment with modern amenities...",
+//     propertyType: "flat",
+//     listingType: "sell",
+//     area: {
+//       value: 1450,
+//       unit: "sqft",
+//     },
+//     price: {
+//       amount: 7500000,
+//       display: "75L",
+//       negotiable: true,
+//       pricePerSqft: 5172,
+//     },
+//     owner: {
+//       id: "user_123",
+//       name: "John Doe",
+//       phone: "+91-9876543210",
+//       email: "john@example.com",
+//       verified: true,
+//       type: "owner",
+//     },
+//     amenities: [
+//       "parking",
+//       "gym",
+//       "swimming-pool",
+//       "garden",
+//       "security",
+//       "power-backup",
+//       "lift",
+//       "club-house",
+//     ],
+//     features: {
+//       furnished: "semi-furnished",
+//       facing: "east",
+//       floorNumber: 5,
+//       totalFloors: 12,
+//       parking: {
+//         covered: 1,
+//         open: 1,
+//       },
+//       balconies: 2,
+//       age: "2-5 years",
+//       possession: "ready-to-move",
+//     },
+//     // location detail/
+//     location: {
+//       address: "Sector 34, BKC Tower",
+//       area: "Vaishali Nagar",
+//       city: "Jaipur",
+//       state: "Rajasthan",
+//       pincode: "302021",
+//       landmark: "Near Phoenix Mall",
+
+//       // Geospatial coordinates for map
+//       coordinates: {
+//         lat: 26.9124,
+//         lng: 75.7873,
+//       },
+
+//       // Nearby places
+//       nearby: {
+//         schools: ["DPS School - 1.2km", "Ryan International - 2km"],
+//         hospitals: ["Fortis Hospital - 3km"],
+//         malls: ["Phoenix Mall - 500m"],
+//         metro: "Mansarovar Metro - 2.5km",
+//       },
+//     },
+
+//     // media details
+//     images: [
+//       {
+//         url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+//         isPrimary: true,
+//         caption: "Living Room",
+//       },
+//       {
+//         url: "https://...",
+//         isPrimary: false,
+//         caption: "Bedroom",
+//       },
+//       // ... more images
+//     ],
+//     video: {
+//       url: "https://youtube.com/...",
+//       thumbnail: "https://...",
+//     },
+
+//     documents: [
+//       {
+//         type: "title-deed",
+//         url: "https://...",
+//         verified: true,
+//       },
+//     ],
+
+//     // status
+//     status: "active", // "sold", "rented", "pending", "inactive"
+//     availability: {
+//       available: true,
+//       availableFrom: "2024-01-01",
+//       immediatelyAvailable: true,
+//     },
+
+//     // for featured /listings
+//     isFeatured: true,
+//     isVerified: true,
+//     isPremium: false,
+//     featuredUntil: "2024-12-31",
+
+//     // matricis
+//     metrics: {
+//       views: 245,
+//       favorites: 45,
+//       inquiries: 12,
+//       lastViewed: "2024-12-30T10:30:00Z",
+//       trending: true,
+//     },
+
+//     // Timestamps & Metadata
+//     timestamps: {
+//       createdAt: "2024-11-01T00:00:00Z",
+//       updatedAt: "2024-12-30T00:00:00Z",
+//       publishedAt: "2024-11-02T00:00:00Z",
+//       expiresAt: "2025-12-31T23:59:59Z",
+//     },
+
+//     // title and description
+//     seo: {
+//       slug: "3-bhk-luxury-flat-vaishali-nagar-jaipur",
+//       metaTitle: "3 BHK Luxury Flat for Sale in Vaishali Nagar",
+//       metaDescription: "Spacious 3BHK apartment...",
+//     },
+
+//     // Additional Property-Specific Fields
+//     // For Flats/Apartments:
+//     apartment: {
+//       societyName: "Prestige Gardens",
+//       towerBlock: "Tower A",
+//       maintenanceCharges: 3500,
+//       maintenanceFrequency: "monthly",
+//     },
+//     // For plots
+//     plot: {
+//       plotNumber: "45",
+//       dimensions: "40x60 feet",
+//       boundaryWall: true,
+//       cornerPlot: false,
+//       roadWidth: "30 feet",
+//       facingRoad: true,
+//     },
+//     // For villas
+//     villa: {
+//       floors: 2,
+//       servants_quarters: true,
+//       garden: true,
+//       gardenArea: "500 sqft",
+//     },
+
+//     //  Rental-Specific Fields (if listingType: "rent")
+//     rental: {
+//       monthlyRent: 35000,
+//       securityDeposit: 105000, // Usually 3 months
+//       maintenanceIncluded: false,
+//       preferredTenants: "family", // "bachelor", "company"
+//       leaseDuration: "11 months minimum",
+//       availableFor: "longterm", // "shortterm"
+//     },
+//   },
+   
+// ];
+
+// export default propertyData;
