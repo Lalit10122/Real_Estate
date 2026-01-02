@@ -28,6 +28,7 @@ import {
   Home as HomeIcon
 } from 'lucide-react'
 import propertyData from '../assets/Data/Property'
+import MapComponent from '../components/MapComponent'
 
 const Property = () => {
   const { propertyid } = useParams()
@@ -107,16 +108,16 @@ const Property = () => {
         </button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         {/* Image Slider Section */}
-        <div className="relative bg-gray-900 h-[300px] sm:h-[400px] lg:h-[550px] rounded-3xl  mb-4 mt-8   ">
+        <div className="relative bg-gray-900 h-[300px] sm:h-[400px] lg:h-[550px] rounded-3xl overflow-hidden mb-6">
           <img
             src={allImages[currentImageIndex]?.url}
             alt={allImages[currentImageIndex]?.caption || 'Property'}
-            className="w-full h-full object-cover rounded-2xl"
+            className="w-full h-full object-cover"
           />
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-2xl"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
           {/* Top Badges */}
           <div className="absolute top-4 left-4 flex flex-wrap gap-2 z-10">
@@ -178,7 +179,7 @@ const Property = () => {
 
           {/* Image Counter */}
           {allImages.length > 1 && (
-            <div className="absolute bottom-4 right-4 px-4 py-2 gap-4 bg-black/80 backdrop-blur-md text-white text-sm font-bold rounded-lg shadow-xl z-10">
+            <div className="absolute bottom-4 right-4 px-4 py-2 bg-black/80 backdrop-blur-md text-white text-sm font-bold rounded-lg shadow-xl z-10">
               {currentImageIndex + 1} / {allImages.length}
             </div>
           )}
@@ -195,7 +196,7 @@ const Property = () => {
         {/* Thumbnail Strip */}
         {allImages.length > 1 && (
           <div className="mb-6">
-            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide z-20 p-6">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {allImages.map((img, index) => (
                 <button
                   key={index}
@@ -238,7 +239,7 @@ const Property = () => {
                   </p>
                   {property.location.landmark && (
                     <p className="text-sm text-gray-500 mt-1">
-                       Near {property.location.landmark}
+                      📍 Near {property.location.landmark}
                     </p>
                   )}
                 </div>
@@ -479,6 +480,17 @@ const Property = () => {
                 </div>
               </div>
             )}
+
+            {/* MAP COMPONENT - ADDED HERE */}
+            {property.location.coordinates && (
+              <MapComponent
+                latitude={property.location.coordinates.lat}
+                longitude={property.location.coordinates.lng}
+                propertyName={`${bedrooms} BHK ${property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)}`}
+                address={`${property.location.area}, ${property.location.city}, ${property.location.state} - ${property.location.pincode}`}
+                propertyType={property.propertyType}
+              />
+            )}
           </div>
 
           {/* Sidebar */}
@@ -623,6 +635,7 @@ const Property = () => {
 }
 
 export default Property
+
 
 // import React, { useState, useEffect } from 'react'
 // import { useParams, useNavigate } from 'react-router-dom'
