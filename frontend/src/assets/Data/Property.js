@@ -166,6 +166,16 @@ const propertyData = [
         isPrimary: true,
         caption: "Villa Front View",
       },
+      {
+        url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+        isPrimary: true,
+        caption: "Villa Front View",
+      },
+      {
+        url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800",
+        isPrimary: true,
+        caption: "Villa Front View",
+      },
     ],
     status: "active",
     availability: {

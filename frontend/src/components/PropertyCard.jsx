@@ -19,14 +19,14 @@ import {
   ChevronRight
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function PropertyCard({ property, onCardClick }) {
   const [isFavorited, setIsFavorited] = useState(false);
 
+  const navigate = useNavigate();
   const handleClick = () => {
-    if (onCardClick) {
-      onCardClick(property);
-    }
+    navigate(`/property/${property.id}`)
   };
 
   const handleFavorite = (e) => {
@@ -37,7 +37,7 @@ export default function PropertyCard({ property, onCardClick }) {
   const handleShare = (e) => {
     e.stopPropagation();
     // Share functionality
-  };
+  }; 
 
   // Extract bedrooms from description or use property type
   const bedrooms = property.description?.match(/(\d+)BHK/)?.[1] || "3";
