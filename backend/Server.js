@@ -2,6 +2,7 @@ import express from 'express'
 import connectDB from './config/mongoDB.js';
 import dotenv from "dotenv";
 import userRouter from './routes/user.route.js';
+import propertyRouter from './routes/property.route.js';
 
 
 // config
@@ -18,8 +19,9 @@ app.use(express.json())
 
 
 // api endpoints
-app.use('/api/user/',userRouter)
+app.use('/api/user',userRouter)
 
+app.use('/api/properties',propertyRouter)
 
 
 app.get('/',(req,res)=>{

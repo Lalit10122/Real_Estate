@@ -1,23 +1,24 @@
-import express from 'express'
-import { Router } from 'express'
+import express from "express";
+import {
+  logInUser,
+  registerUser,
+  registerSeller,
+  logInAdmin,
+  isTokenCoreect,
+} from "../controller/user.controller.js";
+import { protect } from "../middleware/authMiddleware.js";
 
- import { isTokenCoreect, logInAdmin, logInUser, registerSeller, registerUser } from'../controller/user.controller.js';
+const router = express.Router();
 
+// Public routes
+router.post("/register", registerUser); // Register as buyer
+router.post("/register-seller", registerSeller); // Register as seller
+router.post("/login", logInUser); // Login
 
+// Admin routes
+router.post("/admin/login", logInAdmin); // Admin login
 
-const userRouter = Router();
+// Protected routes
+router.get("/verify-token", protect, isTokenCoreect); // Verify if token is valid
 
-
-userRouter.post('/register',registerUser)
-
-userRouter.post('/registerSeller',registerSeller)
-
-// convert seller account?
-
-userRouter.post('/logIn',logInUser)
-
-userRouter.post('/admin',logInAdmin)
-
-userRouter.post('/token',isTokenCoreect)
-
-export default userRouter;
+export default router;
