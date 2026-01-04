@@ -17,6 +17,8 @@ const userSchema = new mongoose.Schema(
     },
     isBuyer: {
       type: Boolean,
+      required:true,
+      default:true
     },
     propertyDataId: {
       type: Array,
