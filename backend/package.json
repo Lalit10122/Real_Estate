@@ -2,15 +2,28 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "Lalit_P",
   "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "Server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "server": "nodemon Server.js",
+    "upload-products": "node scripts/uploadProductsToDB.js"
+  },
   "dependencies": {
-    "nodemon": "^3.1.11"
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^2.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.1.1",
+    "multer": "^2.0.2",
+    "nodemon": "^3.1.11",
+    "razorpay": "^2.9.6",
+    "stripe": "^20.0.0",
+    "validator": "^13.15.23"
   }
 }
