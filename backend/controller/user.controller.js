@@ -65,7 +65,7 @@ const logInUser = async (req, res) => {
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
 
     // Validate input
     if (!email || !password || !name) {
@@ -108,6 +108,7 @@ const registerUser = async (req, res) => {
     const newUser = new userModel({
       name,
       email,
+      phone: phone || '',
       password: hashPass,
       isBuyer: true, // Default is buyer
     });
@@ -140,7 +141,7 @@ const registerUser = async (req, res) => {
 // @access  Public
 const registerSeller = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
 
     // Validate input
     if (!email || !password || !name) {
@@ -183,6 +184,7 @@ const registerSeller = async (req, res) => {
     const newUser = new userModel({
       name,
       email,
+      phone: phone || '',
       password: hashPass,
       isBuyer: false, // Seller
     });

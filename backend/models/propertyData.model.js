@@ -343,15 +343,14 @@ propertySchema.virtual("features.totalParking").get(function () {
 });
 
 // Pre-save middleware to calculate pricePerSqft if not provided
-propertySchema.pre("save", function (next) {
-  if (this.price.amount && this.area.value && !this.price.pricePerSqft) {
+propertySchema.pre("save", async function () {
+  if (this.price && this.price.amount && this.area && this.area.value && !this.price.pricePerSqft) {
     this.price.pricePerSqft = Math.round(this.price.amount / this.area.value);
   }
-  next();
 });
 
 // Pre-save middleware to ensure only one primary image
-propertySchema.pre("save", function (next) {
+propertySchema.pre("save", async function () {
   if (this.images && this.images.length > 0) {
     const primaryImages = this.images.filter((img) => img.isPrimary);
     if (primaryImages.length === 0) {
@@ -364,7 +363,6 @@ propertySchema.pre("save", function (next) {
       });
     }
   }
-  next();
 });
 
 // Instance method to increment views

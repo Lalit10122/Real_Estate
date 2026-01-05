@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import AuthContext from '../context/AuthContext'
-import { Eye, EyeOff, User, Building2, Mail, Lock, ShoppingBag } from 'lucide-react'
+import { Eye, EyeOff, User, Building2, Mail, Lock, ShoppingBag, Phone } from 'lucide-react'
 
 const Register = () => {
   const { registerBuyer, registerSeller } = useContext(AuthContext)
@@ -13,6 +13,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phone: '',
     password: '',
     confirmPassword: '',
   })
@@ -41,6 +42,12 @@ const Register = () => {
       newErrors.email = 'Email is invalid'
     }
 
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required'
+    } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\D/g, ''))) {
+      newErrors.phone = 'Please enter a valid 10-digit phone number'
+    }
+
     if (!formData.password) {
       newErrors.password = 'Password is required'
     } else if (formData.password.length < 6) {
@@ -65,9 +72,9 @@ const Register = () => {
     try {
       let result
       if (userType === 'buyer') {
-        result = await registerBuyer(formData.name, formData.email, formData.password)
+        result = await registerBuyer(formData.name, formData.email, formData.password, formData.phone)
       } else {
-        result = await registerSeller(formData.name, formData.email, formData.password)
+        result = await registerSeller(formData.name, formData.email, formData.password, formData.phone)
       }
 
       if (result.success) {
@@ -184,6 +191,28 @@ const Register = () => {
                 />
               </div>
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
+
+            {/* Phone Field */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="text-gray-400" size={20} />
+                </div>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 ${
+                    userType === 'buyer' ? 'focus:ring-blue-500' : 'focus:ring-green-500'
+                  } focus:border-transparent ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="1234567890"
+                  maxLength="10"
+                />
+              </div>
+              {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
             </div>
 
             {/* Password Field */}

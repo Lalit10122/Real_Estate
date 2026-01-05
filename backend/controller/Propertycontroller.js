@@ -98,7 +98,7 @@ export const createProperty = async (req, res) => {
   
   try {
     // Get user info for fallback values (req.user is set by protect middleware)
-    const user = req.user || await userModel.findById(req.userId).select("name email");
+    const user = req.user || await userModel.findById(req.userId).select("name email phone");
     
     console.log("Creating property - User ID:", req.userId);
     console.log("Request body keys:", Object.keys(req.body));
@@ -183,13 +183,36 @@ export const createProperty = async (req, res) => {
     if (parsedBody.owner.phone === '') parsedBody.owner.phone = undefined;
     if (parsedBody.owner.email === '') parsedBody.owner.email = undefined;
 
+    // Determine phone number - prioritize request phone, then user phone
+    const ownerPhone = parsedBody.owner.phone || (user?.phone && user.phone.trim() !== '' ? user.phone : null);
+    
+    // Validate that phone is provided (required field)
+    if (!ownerPhone || ownerPhone.trim() === '') {
+      // Clean up uploaded images if validation fails
+      if (uploadedImages.length > 0) {
+        console.log("Cleaning up uploaded images due to validation error...");
+        uploadedImages.forEach((img) => {
+          if (img.publicId) {
+            deleteFromCloudinary(img.publicId).catch(cleanupError => {
+              console.error("Failed to cleanup image:", cleanupError);
+            });
+          }
+        });
+      }
+      
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required. Please provide a phone number in the property form or update your profile with a phone number.",
+      });
+    }
+
     // Set userId from authenticated user
     const propertyData = {
       ...parsedBody,
       userId: req.userId,
       owner: {
         name: parsedBody.owner.name || user?.name || 'Unknown',
-        phone: parsedBody.owner.phone || '',
+        phone: ownerPhone.trim(),
         email: parsedBody.owner.email || user?.email || '',
         type: parsedBody.owner.type || 'owner',
         id: req.userId,

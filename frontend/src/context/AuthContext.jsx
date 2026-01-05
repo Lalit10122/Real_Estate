@@ -62,12 +62,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Register as Buyer
-  const registerBuyer = async (name, email, password) => {
+  const registerBuyer = async (name, email, password, phone) => {
     try {
       const response = await axios.post(`${API_URL}/users/register`, {
         name,
         email,
         password,
+        phone: phone || '',
       });
 
       if (response.data.success) {
@@ -97,12 +98,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Register as Seller
-  const registerSeller = async (name, email, password) => {
+  const registerSeller = async (name, email, password, phone) => {
     try {
       const response = await axios.post(`${API_URL}/users/register-seller`, {
         name,
         email,
         password,
+        phone: phone || '',
       });
 
       if (response.data.success) {
