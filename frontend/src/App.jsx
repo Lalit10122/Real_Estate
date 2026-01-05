@@ -6,7 +6,7 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Auth Pages
-import Login from './pages/Login'
+import LogIn from './pages/LogIn'
 import Register from './pages/Register'
 
 // Buyer Pages
@@ -28,7 +28,7 @@ const App = () => {
         <Header />
         <Routes>
           {/* Auth Routes - Public */}
-          <Route path='/login' element={<Login />} />
+          <Route path='/login' element={<LogIn />} />
           <Route path='/register' element={<Register />} />
 
           {/* Buyer Routes - Public */}

@@ -3,8 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import AuthContext from '../context/AuthContext'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 
-const Login = () => {
-  const { login } = useContext(AuthContext)
+const LogIn = () => {
+  const { login } = useContext(AuthContext) 
   const navigate = useNavigate()
 
   const [showPassword, setShowPassword] = useState(false)
@@ -212,4 +212,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default LogIn
