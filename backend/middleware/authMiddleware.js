@@ -142,14 +142,28 @@ export const checkPropertyOwnership = async (req, res, next) => {
 // Middleware to check if user is a seller (not a buyer)
 export const checkSeller = async (req, res, next) => {
   try {
-    if (req.user.isBuyer === true) {
-      return res.status(403).json({
+    // Ensure user object exists
+    if (!req.user) {
+      return res.status(401).json({
         success: false,
-        message: "Only sellers can create properties. Please register as a seller.",
+        message: "User not authenticated",
       });
     }
+
+    // Check if user is a buyer (isBuyer === true means buyer, isBuyer === false means seller)
+    // Also handle undefined/null cases - default to buyer for safety
+    if (req.user.isBuyer === true || req.user.isBuyer === undefined || req.user.isBuyer === null) {
+      return res.status(403).json({
+        success: false,
+        message: "Only sellers can create properties. Please register as a seller or contact support to upgrade your account.",
+        userType: req.user.isBuyer === true ? 'buyer' : 'unknown',
+      });
+    }
+
+    // User is a seller (isBuyer === false)
     next();
   } catch (error) {
+    console.error("Seller check error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error in seller check",

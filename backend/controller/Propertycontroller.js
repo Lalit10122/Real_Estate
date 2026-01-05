@@ -7,23 +7,50 @@ import { v2 as cloudinary } from "cloudinary";
 
 
 // Helper function to upload image to Cloudinary
+// Accepts either a file path (string) or buffer (Buffer)
 const uploadToCloudinary = async (imageFile) => {
   try {
-    const result = await cloudinary.uploader.upload(imageFile, {
-      folder: "property-images",
-      resource_type: "auto",
-      transformation: [
-        { width: 1200, height: 800, crop: "limit" },
-        { quality: "auto" },
-        { fetch_format: "auto" },
-      ],
-    });
+    let result;
+    
+    if (Buffer.isBuffer(imageFile)) {
+      // For buffers, use upload_stream
+      result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "property-images",
+            resource_type: "auto",
+            transformation: [
+              { width: 1200, height: 800, crop: "limit" },
+              { quality: "auto" },
+              { fetch_format: "auto" },
+            ],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(imageFile);
+      });
+    } else {
+      // For file paths or data URIs
+      result = await cloudinary.uploader.upload(imageFile, {
+        folder: "property-images",
+        resource_type: "auto",
+        transformation: [
+          { width: 1200, height: 800, crop: "limit" },
+          { quality: "auto" },
+          { fetch_format: "auto" },
+        ],
+      });
+    }
 
     return {
       url: result.secure_url,
       publicId: result.public_id,
     };
   } catch (error) {
+    console.error("Cloudinary upload error:", error);
     throw new Error(`Cloudinary upload failed: ${error.message}`);
   }
 };
@@ -37,38 +64,160 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
+// Helper function to parse nested FormData fields (e.g., "area[value]" -> {area: {value: ...}})
+const parseNestedFields = (body) => {
+  const parsed = {};
+  
+  for (const key in body) {
+    const value = body[key];
+    
+    // Check if key contains brackets (nested field)
+    if (key.includes('[') && key.includes(']')) {
+      // Split by brackets to get nested path
+      const parts = key.split(/[\[\]]/).filter(Boolean);
+      
+      let current = parsed;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const part = parts[i];
+        if (!current[part]) {
+          current[part] = {};
+        }
+        current = current[part];
+      }
+      current[parts[parts.length - 1]] = value;
+    } else {
+      parsed[key] = value;
+    }
+  }
+  
+  return parsed;
+};
+
 export const createProperty = async (req, res) => {
+  let uploadedImages = [];
+  
   try {
-    let uploadedImages = [];
+    // Get user info for fallback values (req.user is set by protect middleware)
+    const user = req.user || await userModel.findById(req.userId).select("name email");
+    
+    console.log("Creating property - User ID:", req.userId);
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("Files count:", req.files?.length || 0);
 
     // Handle image upload if files are present
     if (req.files && req.files.length > 0) {
+      console.log("Uploading images to Cloudinary...");
       const uploadPromises = req.files.map(async (file, index) => {
-        const result = await uploadToCloudinary(file.path);
-        return {
-          url: result.url,
-          publicId: result.publicId,
-          isPrimary: index === 0,
-          caption: req.body[`caption_${index}`] || file.originalname,
-        };
+        try {
+          // Use buffer if available (memory storage), otherwise use path (disk storage)
+          const imageSource = file.buffer || file.path;
+          if (!imageSource) {
+            throw new Error(`No image source found for file ${index}`);
+          }
+          
+          const result = await uploadToCloudinary(imageSource);
+          return {
+            url: result.url,
+            publicId: result.publicId,
+            isPrimary: index === 0,
+            caption: req.body[`caption_${index}`] || file.originalname,
+          };
+        } catch (uploadError) {
+          console.error(`Failed to upload image ${index}:`, uploadError);
+          throw uploadError;
+        }
       });
 
       uploadedImages = await Promise.all(uploadPromises);
+      console.log("Images uploaded successfully:", uploadedImages.length);
     }
+
+    // Parse nested FormData fields into nested objects
+    const parsedBody = parseNestedFields(req.body);
+    console.log("Parsed body:", JSON.stringify(parsedBody, null, 2));
+    
+    // Helper function to clean empty strings (convert to undefined)
+    const cleanValue = (value) => {
+      if (value === '' || value === null) return undefined;
+      return value;
+    };
+    
+    // Convert string numbers to actual numbers and clean empty strings
+    if (parsedBody.area?.value !== undefined && parsedBody.area.value !== '') {
+      parsedBody.area.value = Number(parsedBody.area.value);
+    }
+    if (parsedBody.price?.amount !== undefined && parsedBody.price.amount !== '') {
+      parsedBody.price.amount = Number(parsedBody.price.amount);
+    }
+    if (parsedBody.price?.negotiable !== undefined) {
+      parsedBody.price.negotiable = parsedBody.price.negotiable === 'true' || parsedBody.price.negotiable === true;
+    }
+    if (parsedBody.features?.floorNumber !== undefined && parsedBody.features.floorNumber !== '') {
+      parsedBody.features.floorNumber = Number(parsedBody.features.floorNumber);
+    }
+    if (parsedBody.features?.totalFloors !== undefined && parsedBody.features.totalFloors !== '') {
+      parsedBody.features.totalFloors = Number(parsedBody.features.totalFloors);
+    }
+    if (parsedBody.features?.parking?.covered !== undefined && parsedBody.features.parking.covered !== '') {
+      parsedBody.features.parking.covered = Number(parsedBody.features.parking.covered);
+    }
+    if (parsedBody.features?.parking?.open !== undefined && parsedBody.features.parking.open !== '') {
+      parsedBody.features.parking.open = Number(parsedBody.features.parking.open);
+    }
+    if (parsedBody.features?.balconies !== undefined && parsedBody.features.balconies !== '') {
+      parsedBody.features.balconies = Number(parsedBody.features.balconies);
+    }
+    
+    // Handle amenities array (FormData sends as amenities[0], amenities[1], etc.)
+    if (parsedBody.amenities && typeof parsedBody.amenities === 'object' && !Array.isArray(parsedBody.amenities)) {
+      parsedBody.amenities = Object.values(parsedBody.amenities).filter(Boolean);
+    }
+    
+    // Ensure owner object exists with required fields
+    if (!parsedBody.owner) {
+      parsedBody.owner = {};
+    }
+    
+    // Clean empty strings from owner fields
+    if (parsedBody.owner.name === '') parsedBody.owner.name = undefined;
+    if (parsedBody.owner.phone === '') parsedBody.owner.phone = undefined;
+    if (parsedBody.owner.email === '') parsedBody.owner.email = undefined;
 
     // Set userId from authenticated user
     const propertyData = {
-      ...req.body,
+      ...parsedBody,
       userId: req.userId,
       owner: {
-        ...req.body.owner,
+        name: parsedBody.owner.name || user?.name || 'Unknown',
+        phone: parsedBody.owner.phone || '',
+        email: parsedBody.owner.email || user?.email || '',
+        type: parsedBody.owner.type || 'owner',
         id: req.userId,
+        verified: false,
       },
-      images: uploadedImages,
+      images: uploadedImages || [],
     };
+    
+    // Remove undefined values to avoid validation issues
+    Object.keys(propertyData).forEach(key => {
+      if (propertyData[key] === undefined) {
+        delete propertyData[key];
+      }
+    });
+    
+    if (propertyData.features) {
+      Object.keys(propertyData.features).forEach(key => {
+        if (propertyData.features[key] === undefined) {
+          delete propertyData.features[key];
+        }
+      });
+    }
+
+    console.log("Creating property with data:", JSON.stringify(propertyData, null, 2));
 
     const property = new propertyModel(propertyData);
     await property.save();
+    console.log("Property saved successfully:", property._id);
 
     // Add property ID to user's propertyDataId array
     await userModel.findByIdAndUpdate(
@@ -83,19 +232,29 @@ export const createProperty = async (req, res) => {
       data: property,
     });
   } catch (error) {
+    console.error("Error creating property:", error);
+    console.error("Error stack:", error.stack);
+    
     // If property creation fails, delete uploaded images
     if (uploadedImages.length > 0) {
+      console.log("Cleaning up uploaded images...");
       uploadedImages.forEach((img) => {
         if (img.publicId) {
-          deleteFromCloudinary(img.publicId);
+          deleteFromCloudinary(img.publicId).catch(cleanupError => {
+            console.error("Failed to cleanup image:", cleanupError);
+          });
         }
       });
     }
 
-    res.status(400).json({
+    // Return appropriate status code
+    const statusCode = error.name === 'ValidationError' ? 400 : 500;
+    
+    res.status(statusCode).json({
       success: false,
       message: "Failed to create property",
       error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     });
   }
 };
@@ -241,7 +400,9 @@ export const updateProperty = async (req, res) => {
     // Handle new image uploads
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map(async (file, index) => {
-        const result = await uploadToCloudinary(file.path);
+        // Use buffer if available (memory storage), otherwise use path (disk storage)
+        const imageSource = file.buffer || file.path;
+        const result = await uploadToCloudinary(imageSource);
         return {
           url: result.url,
           publicId: result.publicId,

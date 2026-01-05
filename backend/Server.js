@@ -1,33 +1,35 @@
-import express from 'express'
+import express from 'express';
+import cors from 'cors';
 import connectDB from './config/mongoDB.js';
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import userRouter from './routes/user.route.js';
 import propertyRouter from './routes/property.route.js';
 import connectCloudinary from './config/cloudinary.js';
 
 
 // config
-dotenv.config()
+dotenv.config();
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 8081; // Align default with frontend API_URL
 
 connectDB();
 connectCloudinary();
 
 // middleware
-app.use(express.json())
-// app.use(cors())
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies (for FormData text fields)
+app.use(cors()); // Allow frontend to call the API across origins
 
 
 // api endpoints
-app.use('/api/user',userRouter)
-app.use('/api/properties',propertyRouter)
+app.use('/api/users', userRouter);
+app.use('/api/properties', propertyRouter);
 
 
-app.get('/',(req,res)=>{
-  res.send("api is working")
-})
+app.get('/', (req, res) => {
+  res.send('api is working');
+});
 
-app.listen(port,()=>{
-  console.log(`Server is started on port ${port}`)
-})
+app.listen(port, () => {
+  console.log(`Server is started on port ${port}`);
+});

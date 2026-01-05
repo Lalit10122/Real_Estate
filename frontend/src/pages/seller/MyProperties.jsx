@@ -19,7 +19,7 @@ const MyProperties = () => {
     try {
       const statusParam = filter !== 'all' ? `?status=${filter}` : ''
       const response = await axios.get(
-        `http://localhost:5000/api/properties/user/me${statusParam}`,
+        `http://localhost:8081/api/properties/user/me${statusParam}`,
         { headers: getAuthHeader() }
       )
       if (response.data.success) {
@@ -39,7 +39,7 @@ const MyProperties = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/properties/${id}`,
+        `http://localhost:8081/api/properties/${id}`,
         { headers: getAuthHeader() }
       )
       if (response.data.success) {

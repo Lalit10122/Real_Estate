@@ -1,13 +1,48 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import AuthContext from '../../context/AuthContext'
 import { Upload, X } from 'lucide-react'
 
 const AddProperty = () => {
-  const { getAuthHeader, user } = useContext(AuthContext)
+  const { getAuthHeader, user, isBuyer, isSeller, isAuthenticated } = useContext(AuthContext)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [checkingSeller, setCheckingSeller] = useState(true)
+
+  // Verify user is actually a seller from the server
+  useEffect(() => {
+    const verifySellerStatus = async () => {
+      if (!isAuthenticated) {
+        navigate('/login')
+        return
+      }
+
+      try {
+        const response = await axios.get('http://localhost:8081/api/users/verify-token', {
+          headers: getAuthHeader()
+        })
+
+        if (response.data.success && response.data.user) {
+          // Check if user is actually a seller
+          if (response.data.user.isBuyer === true) {
+            setError('You must register as a seller to add properties. Please register as a seller.')
+            setTimeout(() => {
+              navigate('/register')
+            }, 3000)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to verify seller status:', error)
+        setError('Failed to verify your account status. Please try again.')
+      } finally {
+        setCheckingSeller(false)
+      }
+    }
+
+    verifySellerStatus()
+  }, [isAuthenticated, navigate, getAuthHeader])
   const [images, setImages] = useState([])
   const [formData, setFormData] = useState({
     description: '',
@@ -63,7 +98,15 @@ const AddProperty = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Check if user is actually a seller (not just toggled in UI)
+    if (isBuyer || !isSeller) {
+      setError('You must register as a seller to add properties. Please register as a seller or contact support.')
+      return
+    }
+
     setLoading(true)
+    setError('')
 
     try {
       const data = new FormData()
@@ -105,7 +148,7 @@ const AddProperty = () => {
       })
 
       const response = await axios.post(
-        'http://localhost:5000/api/properties',
+        'http://localhost:8081/api/properties',
         data,
         {
           headers: {
@@ -121,7 +164,17 @@ const AddProperty = () => {
       }
     } catch (error) {
       console.error('Failed to add property:', error)
-      alert(error.response?.data?.message || 'Failed to add property')
+      const errorMessage = error.response?.data?.message || 'Failed to add property'
+      setError(errorMessage)
+      
+      // If user is not a seller, redirect to registration
+      if (error.response?.status === 403 && errorMessage.includes('seller')) {
+        setTimeout(() => {
+          if (window.confirm('You need to register as a seller. Would you like to register now?')) {
+            navigate('/register')
+          }
+        }, 2000)
+      }
     } finally {
       setLoading(false)
     }
@@ -138,9 +191,35 @@ const AddProperty = () => {
     'club-house',
   ]
 
+  if (checkingSeller) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p>Verifying seller status...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Add New Property</h1>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600">{error}</p>
+          {error.includes('register as a seller') && (
+            <a 
+              href="/register" 
+              className="text-blue-600 hover:underline mt-2 inline-block"
+            >
+              Go to Registration →
+            </a>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Basic Info */}
