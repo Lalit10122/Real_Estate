@@ -1,20 +1,70 @@
-
-
 // @desc    Create a new property
 // @route   POST /api/properties
 
 import propertyModel from "../models/propertyData.model.js";
 import userModel from "../models/user.model.js";
+import { v2 as cloudinary } from "cloudinary";
+
+
+// Helper function to upload image to Cloudinary
+const uploadToCloudinary = async (imageFile) => {
+  try {
+    const result = await cloudinary.uploader.upload(imageFile, {
+      folder: "property-images",
+      resource_type: "auto",
+      transformation: [
+        { width: 1200, height: 800, crop: "limit" },
+        { quality: "auto" },
+        { fetch_format: "auto" },
+      ],
+    });
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
+  } catch (error) {
+    throw new Error(`Cloudinary upload failed: ${error.message}`);
+  }
+};
+
+// Helper function to delete image from Cloudinary
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error("Cloudinary delete error:", error);
+  }
+};
+
 export const createProperty = async (req, res) => {
   try {
+    let uploadedImages = [];
+
+    // Handle image upload if files are present
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(async (file, index) => {
+        const result = await uploadToCloudinary(file.path);
+        return {
+          url: result.url,
+          publicId: result.publicId,
+          isPrimary: index === 0,
+          caption: req.body[`caption_${index}`] || file.originalname,
+        };
+      });
+
+      uploadedImages = await Promise.all(uploadPromises);
+    }
+
     // Set userId from authenticated user
     const propertyData = {
       ...req.body,
-      userId: req.userId, // From auth middleware
+      userId: req.userId,
       owner: {
         ...req.body.owner,
-        id: req.userId, // Ensure owner.id matches authenticated user
+        id: req.userId,
       },
+      images: uploadedImages,
     };
 
     const property = new propertyModel(propertyData);
@@ -33,6 +83,15 @@ export const createProperty = async (req, res) => {
       data: property,
     });
   } catch (error) {
+    // If property creation fails, delete uploaded images
+    if (uploadedImages.length > 0) {
+      uploadedImages.forEach((img) => {
+        if (img.publicId) {
+          deleteFromCloudinary(img.publicId);
+        }
+      });
+    }
+
     res.status(400).json({
       success: false,
       message: "Failed to create property",
@@ -168,10 +227,43 @@ export const getPropertyById = async (req, res) => {
 // @access  Private (Owner only)
 export const updateProperty = async (req, res) => {
   try {
+    const property = await propertyModel.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    let newImages = [];
+
+    // Handle new image uploads
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(async (file, index) => {
+        const result = await uploadToCloudinary(file.path);
+        return {
+          url: result.url,
+          publicId: result.publicId,
+          isPrimary: false,
+          caption: req.body[`caption_${index}`] || file.originalname,
+        };
+      });
+
+      newImages = await Promise.all(uploadPromises);
+    }
+
+    // Merge existing images with new images
+    const updatedImages =
+      newImages.length > 0 ? [...property.images, ...newImages] : property.images;
+
     // Property ownership already checked in middleware (req.property exists)
     const updatedProperty = await propertyModel.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      {
+        ...req.body,
+        images: updatedImages,
+      },
       {
         new: true,
         runValidators: true,
@@ -197,6 +289,25 @@ export const updateProperty = async (req, res) => {
 // @access  Private (Owner only)
 export const deleteProperty = async (req, res) => {
   try {
+    const property = await propertyModel.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    // Delete all images from Cloudinary
+    if (property.images && property.images.length > 0) {
+      const deletePromises = property.images.map((img) => {
+        if (img.publicId) {
+          return deleteFromCloudinary(img.publicId);
+        }
+      });
+      await Promise.all(deletePromises);
+    }
+
     // Property ownership already checked in middleware (req.property exists)
     await propertyModel.findByIdAndDelete(req.params.id);
 
@@ -306,7 +417,7 @@ export const getPropertiesByUser = async (req, res) => {
     const { page = 1, limit = 10, status } = req.query;
 
     const query = { userId };
-    
+
     // Optionally filter by status
     if (status) {
       query.status = status;
@@ -595,8 +706,14 @@ export const getUserProfile = async (req, res) => {
       soldProperties: properties.filter((p) => p.status === "sold").length,
       rentedProperties: properties.filter((p) => p.status === "rented").length,
       totalViews: properties.reduce((sum, p) => sum + p.metrics.views, 0),
-      totalFavorites: properties.reduce((sum, p) => sum + p.metrics.favorites, 0),
-      totalInquiries: properties.reduce((sum, p) => sum + p.metrics.inquiries, 0),
+      totalFavorites: properties.reduce(
+        (sum, p) => sum + p.metrics.favorites,
+        0
+      ),
+      totalInquiries: properties.reduce(
+        (sum, p) => sum + p.metrics.inquiries,
+        0
+      ),
     };
 
     res.status(200).json({
