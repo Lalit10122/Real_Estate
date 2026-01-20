@@ -1,65 +1,83 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Search, User, BarChart3, Menu, X, PlusCircle, Building2, ShoppingBag, LogIn, UserPlus, LogOut } from 'lucide-react'
-import gsap from 'gsap'
-import { useContext } from 'react'
-import AuthContext from '../context/AuthContext'
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Home,
+  Search,
+  User,
+  BarChart3,
+  Menu,
+  X,
+  PlusCircle,
+  Building2,
+  ShoppingBag,
+  LogIn,
+  UserPlus,
+  LogOut,
+} from "lucide-react";
+import gsap from "gsap";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 const Header = () => {
-  const { isBuyer, setIsBuyer, isAuthenticated, user, logout } = useContext(AuthContext)
-  const location = useLocation()
-  const navigate = useNavigate()
-  const [isOpen, setIsOpen] = useState(false)
+  const { isBuyer, setIsBuyer, isAuthenticated, user, logout } =
+    useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
-  const drawerRef = useRef(null)
-  const overlayRef = useRef(null)
+  const drawerRef = useRef(null);
+  const overlayRef = useRef(null);
 
   // Swipe tracking
-  const touchStartX = useRef(0)
-  const touchEndX = useRef(0)
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   // Buyer Navigation Items
   const buyerNavItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/search', label: 'Search', icon: Search },
-  ]
+    { path: "/", label: "Home", icon: Home },
+    { path: "/search", label: "Search", icon: Search },
+  ];
 
   // Seller Navigation Items
   const sellerNavItems = [
-    { path: '/seller/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { path: '/seller/my-properties', label: 'My Properties', icon: Building2 },
-    { path: '/seller/add-property', label: 'Add Property', icon: PlusCircle },
-  ]
+    { path: "/seller/dashboard", label: "Dashboard", icon: BarChart3 },
+    { path: "/seller/my-properties", label: "My Properties", icon: Building2 },
+    { path: "/seller/add-property", label: "Add Property", icon: PlusCircle },
+  ];
 
   // Get current nav items based on mode
-  const navItems = isAuthenticated ? (isBuyer ? buyerNavItems : sellerNavItems) : buyerNavItems
+  const navItems = isAuthenticated
+    ? isBuyer
+      ? buyerNavItems
+      : sellerNavItems
+    : buyerNavItems;
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === path;
 
   // Toggle between Buyer and Seller mode
   const handleModeToggle = () => {
     if (!isAuthenticated) {
       // If not logged in, redirect to login
-      navigate('/login')
-      setIsOpen(false)
-      return
+      navigate("/login");
+      setIsOpen(false);
+      return;
     }
 
-    setIsBuyer(!isBuyer)
+    setIsBuyer(!isBuyer);
     // Redirect to appropriate page
     if (isBuyer) {
-      navigate('/seller/dashboard')
+      navigate("/seller/dashboard");
     } else {
-      navigate('/')
+      navigate("/");
     }
-    setIsOpen(false)
-  }
+    setIsOpen(false);
+  };
 
   const handleLogout = () => {
-    logout()
-    navigate('/')
-    setIsOpen(false)
-  }
+    logout();
+    navigate("/");
+    setIsOpen(false);
+  };
 
   const NavContent = () => (
     <>
@@ -69,7 +87,7 @@ const Header = () => {
           to={path}
           onClick={() => setIsOpen(false)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-            isActive(path) ? 'bg-black text-white' : 'hover:bg-gray-200'
+            isActive(path) ? "bg-black text-white" : "hover:bg-gray-200"
           }`}
         >
           <Icon size={18} />
@@ -77,64 +95,68 @@ const Header = () => {
         </Link>
       ))}
     </>
-  )
+  );
 
   /* GSAP animations */
   useEffect(() => {
-    if (!drawerRef.current || !overlayRef.current) return
+    if (!drawerRef.current || !overlayRef.current) return;
 
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
 
       gsap.to(overlayRef.current, {
         opacity: 1,
         duration: 0.3,
-        pointerEvents: 'auto',
-      })
+        pointerEvents: "auto",
+      });
 
       gsap.fromTo(
         drawerRef.current,
-        { x: '100%' },
-        { x: '0%', duration: 0.45, ease: 'power3.out' }
-      )
+        { x: "100%" },
+        { x: "0%", duration: 0.45, ease: "power3.out" },
+      );
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
 
       gsap.to(overlayRef.current, {
         opacity: 0,
         duration: 0.3,
-        pointerEvents: 'none',
-      })
+        pointerEvents: "none",
+      });
 
       gsap.to(drawerRef.current, {
-        x: '100%',
+        x: "100%",
         duration: 0.4,
-        ease: 'power3.in',
-      })
+        ease: "power3.in",
+      });
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   /* Swipe handlers */
   const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX
-  }
+    touchStartX.current = e.touches[0].clientX;
+  };
 
   const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX
-  }
+    touchEndX.current = e.touches[0].clientX;
+  };
 
   const handleTouchEnd = () => {
     if (touchEndX.current - touchStartX.current > 80) {
-      setIsOpen(false)
+      setIsOpen(false);
     }
-  }
+  };
 
   return (
     <>
       <nav className="sticky top-0 z-50 bg-white border-b px-2">
         <div className="flex p-2 justify-between items-center">
-          <Link to="/" className="font-bold text-xl">
-            Logo
+          <Link to="/" className="font-bold text-xl ">
+            <img
+              className="w-auto h-18"
+              src="\src\assets\TerraPulse.jpeg"
+              alt="logo"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -151,8 +173,8 @@ const Header = () => {
                   onClick={handleModeToggle}
                   className={`hidden md:flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
                     isBuyer
-                      ? 'bg-blue-500 text-white hover:bg-blue-600'
-                      : 'bg-green-500 text-white hover:bg-green-600'
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-green-500 text-white hover:bg-green-600"
                   }`}
                 >
                   {isBuyer ? (
@@ -228,7 +250,7 @@ const Header = () => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className="fixed top-0 right-0 h-screen w-64 bg-white border-l z-50 overflow-y-auto"
-        style={{ transform: 'translateX(100%)' }}
+        style={{ transform: "translateX(100%)" }}
       >
         <div className="flex justify-end p-4">
           <X onClick={() => setIsOpen(false)} className="cursor-pointer" />
@@ -241,7 +263,7 @@ const Header = () => {
               <p className="text-sm text-gray-600">Welcome,</p>
               <p className="font-semibold">{user.name}</p>
               <p className="text-xs text-gray-500">
-                {isBuyer ? 'Buyer Mode' : 'Seller Mode'}
+                {isBuyer ? "Buyer Mode" : "Seller Mode"}
               </p>
             </div>
           )}
@@ -256,8 +278,8 @@ const Header = () => {
                 onClick={handleModeToggle}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
                   isBuyer
-                    ? 'bg-blue-500 text-white hover:bg-blue-600'
-                    : 'bg-green-500 text-white hover:bg-green-600'
+                    ? "bg-blue-500 text-white hover:bg-blue-600"
+                    : "bg-green-500 text-white hover:bg-green-600"
                 }`}
               >
                 {isBuyer ? (
@@ -318,7 +340,7 @@ const Header = () => {
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

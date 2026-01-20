@@ -1,91 +1,97 @@
-import React, { useState, useContext, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
-import AuthContext from '../../context/AuthContext'
-import { Upload, X } from 'lucide-react'
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import AuthContext from "../../context/AuthContext";
+import { Upload, X } from "lucide-react";
 
 const AddProperty = () => {
-  const { getAuthHeader, user, isBuyer, isSeller, isAuthenticated } = useContext(AuthContext)
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [checkingSeller, setCheckingSeller] = useState(true)
+  const { getAuthHeader, user, isBuyer, isSeller, isAuthenticated } =
+    useContext(AuthContext);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [checkingSeller, setCheckingSeller] = useState(true);
 
   // Verify user is actually a seller from the server
   useEffect(() => {
     const verifySellerStatus = async () => {
       if (!isAuthenticated) {
-        navigate('/login')
-        return
+        navigate("/login");
+        return;
       }
 
       try {
-        const response = await axios.get('http://localhost:8081/api/users/verify-token', {
-          headers: getAuthHeader()
-        })
+        const response = await axios.get(
+          "http://localhost:8081/api/users/verify-token",
+          {
+            headers: getAuthHeader(),
+          },
+        );
 
         if (response.data.success && response.data.user) {
           // Check if user is actually a seller
           if (response.data.user.isBuyer === true) {
-            setError('You must register as a seller to add properties. Please register as a seller.')
+            setError(
+              "You must register as a seller to add properties. Please register as a seller.",
+            );
             setTimeout(() => {
-              navigate('/register')
-            }, 3000)
+              navigate("/register");
+            }, 3000);
           }
         }
       } catch (error) {
-        console.error('Failed to verify seller status:', error)
-        setError('Failed to verify your account status. Please try again.')
+        console.error("Failed to verify seller status:", error);
+        setError("Failed to verify your account status. Please try again.");
       } finally {
-        setCheckingSeller(false)
+        setCheckingSeller(false);
       }
-    }
+    };
 
-    verifySellerStatus()
-  }, [isAuthenticated, navigate, getAuthHeader])
-  const [images, setImages] = useState([])
+    verifySellerStatus();
+  }, [isAuthenticated, navigate, getAuthHeader]);
+  const [images, setImages] = useState([]);
   const [formData, setFormData] = useState({
-    description: '',
-    propertyType: 'flat',
-    listingType: 'sell',
-    areaValue: '',
-    areaUnit: 'sqft',
-    priceAmount: '',
-    priceDisplay: '',
+    description: "",
+    propertyType: "flat",
+    listingType: "sell",
+    areaValue: "",
+    areaUnit: "sqft",
+    priceAmount: "",
+    priceDisplay: "",
     negotiable: false,
-    ownerName: user?.name || '',
-    ownerPhone: '',
-    ownerEmail: user?.email || '',
-    address: '',
-    area: '',
-    city: '',
-    state: '',
-    pincode: '',
-    furnished: 'unfurnished',
-    facing: 'north',
-    floorNumber: '',
-    totalFloors: '',
+    ownerName: user?.name || "",
+    ownerPhone: "",
+    ownerEmail: user?.email || "",
+    address: "",
+    area: "",
+    city: "",
+    state: "",
+    pincode: "",
+    furnished: "unfurnished",
+    facing: "north",
+    floorNumber: "",
+    totalFloors: "",
     parking: { covered: 0, open: 0 },
     balconies: 0,
     amenities: [],
-  })
+  });
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    })
-  }
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files)
-    setImages(files)
-  }
+    const files = Array.from(e.target.files);
+    setImages(files);
+  };
 
   const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index))
-  }
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const handleAmenityChange = (amenity) => {
     setFormData({
@@ -93,103 +99,110 @@ const AddProperty = () => {
       amenities: formData.amenities.includes(amenity)
         ? formData.amenities.filter((a) => a !== amenity)
         : [...formData.amenities, amenity],
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Check if user is actually a seller (not just toggled in UI)
     if (isBuyer || !isSeller) {
-      setError('You must register as a seller to add properties. Please register as a seller or contact support.')
-      return
+      setError(
+        "You must register as a seller to add properties. Please register as a seller or contact support.",
+      );
+      return;
     }
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError("");
 
     try {
-      const data = new FormData()
+      const data = new FormData();
 
       // Append text fields
-      data.append('description', formData.description)
-      data.append('propertyType', formData.propertyType)
-      data.append('listingType', formData.listingType)
-      data.append('area[value]', formData.areaValue)
-      data.append('area[unit]', formData.areaUnit)
-      data.append('price[amount]', formData.priceAmount)
-      data.append('price[display]', formData.priceDisplay)
-      data.append('price[negotiable]', formData.negotiable)
-      data.append('owner[name]', formData.ownerName)
-      data.append('owner[phone]', formData.ownerPhone)
-      data.append('owner[email]', formData.ownerEmail)
-      data.append('owner[type]', 'owner')
-      data.append('location[address]', formData.address)
-      data.append('location[area]', formData.area)
-      data.append('location[city]', formData.city)
-      data.append('location[state]', formData.state)
-      data.append('location[pincode]', formData.pincode)
-      data.append('features[furnished]', formData.furnished)
-      data.append('features[facing]', formData.facing)
-      data.append('features[floorNumber]', formData.floorNumber)
-      data.append('features[totalFloors]', formData.totalFloors)
-      data.append('features[parking][covered]', formData.parking.covered)
-      data.append('features[parking][open]', formData.parking.open)
-      data.append('features[balconies]', formData.balconies)
-      
+      data.append("description", formData.description);
+      data.append("propertyType", formData.propertyType);
+      data.append("listingType", formData.listingType);
+      data.append("area[value]", formData.areaValue);
+      data.append("area[unit]", formData.areaUnit);
+      data.append("price[amount]", formData.priceAmount);
+      data.append("price[display]", formData.priceDisplay);
+      data.append("price[negotiable]", formData.negotiable);
+      data.append("owner[name]", formData.ownerName);
+      data.append("owner[phone]", formData.ownerPhone);
+      data.append("owner[email]", formData.ownerEmail);
+      data.append("owner[type]", "owner");
+      data.append("location[address]", formData.address);
+      data.append("location[area]", formData.area);
+      data.append("location[city]", formData.city);
+      data.append("location[state]", formData.state);
+      data.append("location[pincode]", formData.pincode);
+      data.append("features[furnished]", formData.furnished);
+      data.append("features[facing]", formData.facing);
+      data.append("features[floorNumber]", formData.floorNumber);
+      data.append("features[totalFloors]", formData.totalFloors);
+      data.append("features[parking][covered]", formData.parking.covered);
+      data.append("features[parking][open]", formData.parking.open);
+      data.append("features[balconies]", formData.balconies);
+
       // Append amenities
       formData.amenities.forEach((amenity, index) => {
-        data.append(`amenities[${index}]`, amenity)
-      })
+        data.append(`amenities[${index}]`, amenity);
+      });
 
       // Append images
       images.forEach((image) => {
-        data.append('images', image)
-      })
+        data.append("images", image);
+      });
 
       const response = await axios.post(
-        'http://localhost:8081/api/properties',
+        "http://localhost:8081/api/properties",
         data,
         {
           headers: {
             ...getAuthHeader(),
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
-        }
-      )
+        },
+      );
 
       if (response.data.success) {
-        alert('Property added successfully!')
-        navigate('/seller/my-properties')
+        alert("Property added successfully!");
+        navigate("/seller/my-properties");
       }
     } catch (error) {
-      console.error('Failed to add property:', error)
-      const errorMessage = error.response?.data?.message || 'Failed to add property'
-      setError(errorMessage)
-      
+      console.error("Failed to add property:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to add property";
+      setError(errorMessage);
+
       // If user is not a seller, redirect to registration
-      if (error.response?.status === 403 && errorMessage.includes('seller')) {
+      if (error.response?.status === 403 && errorMessage.includes("seller")) {
         setTimeout(() => {
-          if (window.confirm('You need to register as a seller. Would you like to register now?')) {
-            navigate('/register')
+          if (
+            window.confirm(
+              "You need to register as a seller. Would you like to register now?",
+            )
+          ) {
+            navigate("/register");
           }
-        }, 2000)
+        }, 2000);
       }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const amenitiesList = [
-    'parking',
-    'gym',
-    'swimming-pool',
-    'garden',
-    'security',
-    'power-backup',
-    'lift',
-    'club-house',
-  ]
+    "parking",
+    "gym",
+    "swimming-pool",
+    "garden",
+    "security",
+    "power-backup",
+    "lift",
+    "club-house",
+  ];
 
   if (checkingSeller) {
     return (
@@ -199,7 +212,7 @@ const AddProperty = () => {
           <p>Verifying seller status...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -210,9 +223,9 @@ const AddProperty = () => {
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-red-600">{error}</p>
-          {error.includes('register as a seller') && (
-            <a 
-              href="/register" 
+          {error.includes("register as a seller") && (
+            <a
+              href="/register"
               className="text-blue-600 hover:underline mt-2 inline-block"
             >
               Go to Registration →
@@ -228,7 +241,9 @@ const AddProperty = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Description *</label>
+              <label className="block text-sm font-medium mb-2">
+                Description *
+              </label>
               <textarea
                 name="description"
                 value={formData.description}
@@ -242,7 +257,9 @@ const AddProperty = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Property Type *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Property Type *
+                </label>
                 <select
                   name="propertyType"
                   value={formData.propertyType}
@@ -259,7 +276,9 @@ const AddProperty = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Listing Type *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Listing Type *
+                </label>
                 <select
                   name="listingType"
                   value={formData.listingType}
@@ -282,7 +301,9 @@ const AddProperty = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Price Amount *</label>
+              <label className="block text-sm font-medium mb-2">
+                Price Amount *
+              </label>
               <input
                 type="number"
                 name="priceAmount"
@@ -295,7 +316,9 @@ const AddProperty = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Display (e.g., 75L)</label>
+              <label className="block text-sm font-medium mb-2">
+                Display (e.g., 75L)
+              </label>
               <input
                 type="text"
                 name="priceDisplay"
@@ -327,7 +350,9 @@ const AddProperty = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Area Size *</label>
+              <label className="block text-sm font-medium mb-2">
+                Area Size *
+              </label>
               <input
                 type="number"
                 name="areaValue"
@@ -362,7 +387,9 @@ const AddProperty = () => {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Address *</label>
+              <label className="block text-sm font-medium mb-2">
+                Address *
+              </label>
               <input
                 type="text"
                 name="address"
@@ -404,7 +431,9 @@ const AddProperty = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">State *</label>
+                <label className="block text-sm font-medium mb-2">
+                  State *
+                </label>
                 <input
                   type="text"
                   name="state"
@@ -417,7 +446,9 @@ const AddProperty = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Pincode *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Pincode *
+                </label>
                 <input
                   type="text"
                   name="pincode"
@@ -438,7 +469,9 @@ const AddProperty = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Furnished</label>
+              <label className="block text-sm font-medium mb-2">
+                Furnished
+              </label>
               <select
                 name="furnished"
                 value={formData.furnished}
@@ -467,7 +500,9 @@ const AddProperty = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Floor Number</label>
+              <label className="block text-sm font-medium mb-2">
+                Floor Number
+              </label>
               <input
                 type="number"
                 name="floorNumber"
@@ -479,7 +514,9 @@ const AddProperty = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Total Floors</label>
+              <label className="block text-sm font-medium mb-2">
+                Total Floors
+              </label>
               <input
                 type="number"
                 name="totalFloors"
@@ -491,7 +528,9 @@ const AddProperty = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Balconies</label>
+              <label className="block text-sm font-medium mb-2">
+                Balconies
+              </label>
               <input
                 type="number"
                 name="balconies"
@@ -517,7 +556,7 @@ const AddProperty = () => {
                   onChange={() => handleAmenityChange(amenity)}
                   className="w-4 h-4"
                 />
-                <span className="capitalize">{amenity.replace('-', ' ')}</span>
+                <span className="capitalize">{amenity.replace("-", " ")}</span>
               </label>
             ))}
           </div>
@@ -530,7 +569,9 @@ const AddProperty = () => {
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             <Upload className="mx-auto mb-4 text-gray-400" size={48} />
             <label className="cursor-pointer">
-              <span className="text-blue-600 hover:text-blue-700">Upload images</span>
+              <span className="text-blue-600 hover:text-blue-700">
+                Upload images
+              </span>
               <input
                 type="file"
                 multiple
@@ -579,11 +620,11 @@ const AddProperty = () => {
             disabled={loading}
             className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
           >
-            {loading ? 'Adding Property...' : 'Add Property'}
+            {loading ? "Adding Property..." : "Add Property"}
           </button>
           <button
             type="button"
-            onClick={() => navigate('/seller/my-properties')}
+            onClick={() => navigate("/seller/my-properties")}
             className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
           >
             Cancel
@@ -591,7 +632,7 @@ const AddProperty = () => {
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default AddProperty
+export default AddProperty;

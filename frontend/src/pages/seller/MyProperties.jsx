@@ -1,75 +1,75 @@
-import React, { useEffect, useState, useContext } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
-import AuthContext from '../../context/AuthContext'
-import { Edit, Trash2, Eye, Heart, MessageSquare, Plus } from 'lucide-react'
+import React, { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import AuthContext from "../../context/AuthContext";
+import { Edit, Trash2, Eye, Heart, MessageSquare, Plus } from "lucide-react";
 
 const MyProperties = () => {
-  const { getAuthHeader } = useContext(AuthContext)
-  const [properties, setProperties] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all') // all, active, sold, rented, draft
+  const { getAuthHeader } = useContext(AuthContext);
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all"); // all, active, sold, rented, draft
 
   useEffect(() => {
-    fetchProperties()
-  }, [filter])
+    fetchProperties();
+  }, [filter]);
 
   const fetchProperties = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const statusParam = filter !== 'all' ? `?status=${filter}` : ''
+      const statusParam = filter !== "all" ? `?status=${filter}` : "";
       const response = await axios.get(
         `http://localhost:8081/api/properties/user/me${statusParam}`,
         { headers: getAuthHeader() }
-      )
+      );
       if (response.data.success) {
-        setProperties(response.data.data)
+        setProperties(response.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch properties:', error)
+      console.error("Failed to fetch properties:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this property?')) {
-      return
+    if (!window.confirm("Are you sure you want to delete this property?")) {
+      return;
     }
 
     try {
       const response = await axios.delete(
         `http://localhost:8081/api/properties/${id}`,
         { headers: getAuthHeader() }
-      )
+      );
       if (response.data.success) {
-        alert('Property deleted successfully!')
-        fetchProperties()
+        alert("Property deleted successfully!");
+        fetchProperties();
       }
     } catch (error) {
-      console.error('Failed to delete property:', error)
-      alert('Failed to delete property')
+      console.error("Failed to delete property:", error);
+      alert("Failed to delete property");
     }
-  }
+  };
 
   const getStatusColor = (status) => {
     const colors = {
-      active: 'bg-green-100 text-green-700',
-      sold: 'bg-blue-100 text-blue-700',
-      rented: 'bg-yellow-100 text-yellow-700',
-      inactive: 'bg-gray-100 text-gray-700',
-      draft: 'bg-purple-100 text-purple-700',
-      pending: 'bg-orange-100 text-orange-700',
-    }
-    return colors[status] || 'bg-gray-100 text-gray-700'
-  }
+      active: "bg-green-100 text-green-700",
+      sold: "bg-blue-100 text-blue-700",
+      rented: "bg-yellow-100 text-yellow-700",
+      inactive: "bg-gray-100 text-gray-700",
+      draft: "bg-purple-100 text-purple-700",
+      pending: "bg-orange-100 text-orange-700",
+    };
+    return colors[status] || "bg-gray-100 text-gray-700";
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -91,19 +91,21 @@ const MyProperties = () => {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {['all', 'active', 'sold', 'rented', 'draft', 'inactive'].map((status) => (
-          <button
-            key={status}
-            onClick={() => setFilter(status)}
-            className={`px-4 py-2 rounded-lg capitalize transition ${
-              filter === status
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {status}
-          </button>
-        ))}
+        {["all", "active", "sold", "rented", "draft", "inactive"].map(
+          (status) => (
+            <button
+              key={status}
+              onClick={() => setFilter(status)}
+              className={`px-4 py-2 rounded-lg capitalize transition ${
+                filter === status
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {status}
+            </button>
+          )
+        )}
       </div>
 
       {/* Properties Grid */}
@@ -124,9 +126,11 @@ const MyProperties = () => {
               />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">No properties found</h3>
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            No properties found
+          </h3>
           <p className="text-gray-500 mb-4">
-            {filter === 'all'
+            {filter === "all"
               ? "You haven't added any properties yet"
               : `No ${filter} properties found`}
           </p>
@@ -186,7 +190,9 @@ const MyProperties = () => {
 
                 {/* Price */}
                 <p className="text-xl font-bold text-blue-600 mb-3">
-                  ₹{property.price.display || property.price.amount.toLocaleString()}
+                  ₹
+                  {property.price.display ||
+                    property.price.amount.toLocaleString()}
                 </p>
 
                 {/* Metrics */}
@@ -228,7 +234,7 @@ const MyProperties = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MyProperties
+export default MyProperties;

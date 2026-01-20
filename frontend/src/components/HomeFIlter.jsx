@@ -1,39 +1,47 @@
-import { useState } from 'react';
-import { Search, MapPin, Home, DollarSign, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { Search, MapPin, Home, DollarSign, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HomeFilter = () => {
   const navigate = useNavigate();
-  const [propertyType, setPropertyType] = useState('buy'); // Set default to 'buy'
-  const [isBuy, setisBuy] = useState(true)
-  const [location, setLocation] = useState('');
-  const [priceRange, setPriceRange] = useState('');
-  const [propertyCategory, setPropertyCategory] = useState('');
+  const [propertyType, setPropertyType] = useState("buy"); // Set default to 'buy'
+  const [isBuy, setisBuy] = useState(true);
+  const [location, setLocation] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+  const [propertyCategory, setPropertyCategory] = useState("");
 
   const cities = [
-    'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Ahmedabad', 
-    'Chennai', 'Kolkata', 'Pune', 'Jaipur', 'Lucknow'
+    "Mumbai",
+    "Delhi",
+    "Bangalore",
+    "Hyderabad",
+    "Ahmedabad",
+    "Chennai",
+    "Kolkata",
+    "Pune",
+    "Jaipur",
+    "Lucknow",
   ];
 
   const priceRanges = [
-    { label: 'Under ₹50L', value: '0-5000000' },
-    { label: '₹50L - ₹1Cr', value: '5000000-10000000' },
-    { label: '₹1Cr - ₹2Cr', value: '10000000-20000000' },
-    { label: '₹2Cr - ₹5Cr', value: '20000000-50000000' },
-    { label: '₹5Cr+', value: '50000000-1000000000' },
+    { label: "Under ₹50L", value: "0-5000000" },
+    { label: "₹50L - ₹1Cr", value: "5000000-10000000" },
+    { label: "₹1Cr - ₹2Cr", value: "10000000-20000000" },
+    { label: "₹2Cr - ₹5Cr", value: "20000000-50000000" },
+    { label: "₹5Cr+", value: "50000000-1000000000" },
   ];
 
-  const categories = ['Flat', 'Villa', 'Plot', 'Commercial'];
+  const categories = ["Flat", "Villa", "Plot", "Commercial"];
 
   // const handleSearch = () => {
   //   // Navigate to search page with filters
   //   const params = new URLSearchParams();
-    
+
   //   if (propertyType) params.append('type', propertyType);
   //   if (location) params.append('location', location);
   //   if (priceRange) params.append('price', priceRange);
   //   if (propertyCategory) params.append('category', propertyCategory);
-    
+
   //   navigate(`/search?${params.toString()}`);
   // };
 
@@ -45,8 +53,8 @@ const HomeFilter = () => {
           onClick={() => setisBuy(true)}
           className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-base transition-all duration-200 ${
             isBuy
-              ? 'bg-black text-white shadow-lg scale-[1.02]'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+              ? "bg-black text-white shadow-lg scale-[1.02]"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
           }`}
         >
           Buy
@@ -55,8 +63,8 @@ const HomeFilter = () => {
           onClick={() => setisBuy(false)}
           className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-base transition-all duration-200 ${
             !isBuy
-              ? 'bg-black text-white shadow-lg scale-[1.02]'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+              ? "bg-black text-white shadow-lg scale-[1.02]"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
           }`}
         >
           Rent
@@ -67,7 +75,10 @@ const HomeFilter = () => {
       <div className="space-y-3">
         {/* Location Select */}
         <div className="relative">
-          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          <MapPin
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            size={20}
+          />
           <select
             value={location}
             onChange={(e) => setLocation(e.target.value)}
@@ -80,12 +91,18 @@ const HomeFilter = () => {
               </option>
             ))}
           </select>
-          <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" size={20} />
+          <ChevronRight
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none"
+            size={20}
+          />
         </div>
 
         {/* Property Type Select */}
         <div className="relative">
-          <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          <Home
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            size={20}
+          />
           <select
             value={propertyCategory}
             onChange={(e) => setPropertyCategory(e.target.value)}
@@ -98,12 +115,18 @@ const HomeFilter = () => {
               </option>
             ))}
           </select>
-          <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" size={20} />
+          <ChevronRight
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none"
+            size={20}
+          />
         </div>
 
         {/* Price Range Select */}
         <div className="relative">
-          <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={20} />
+          <DollarSign
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            size={20}
+          />
           <select
             value={priceRange}
             onChange={(e) => setPriceRange(e.target.value)}
@@ -116,7 +139,10 @@ const HomeFilter = () => {
               </option>
             ))}
           </select>
-          <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" size={20} />
+          <ChevronRight
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none"
+            size={20}
+          />
         </div>
 
         {/* Search Button */}
@@ -133,11 +159,15 @@ const HomeFilter = () => {
       <div className="mt-6 grid grid-cols-2 gap-3">
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center border border-blue-200">
           <div className="text-2xl font-bold text-blue-600">1000+</div>
-          <div className="text-xs text-gray-600 mt-1 font-medium">Properties</div>
+          <div className="text-xs text-gray-600 mt-1 font-medium">
+            Properties
+          </div>
         </div>
         <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 text-center border border-green-200">
           <div className="text-2xl font-bold text-green-600">500+</div>
-          <div className="text-xs text-gray-600 mt-1 font-medium">Happy Clients</div>
+          <div className="text-xs text-gray-600 mt-1 font-medium">
+            Happy Clients
+          </div>
         </div>
       </div>
     </div>
