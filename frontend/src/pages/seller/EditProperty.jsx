@@ -57,7 +57,13 @@ const EditProperty = () => {
         );
 
         if (response.data.success) {
-          const property = response.data.property;
+          const property = response.data.data || response.data.property;
+
+          if (!property) {
+            setError("Property data not found");
+            setFetchingData(false);
+            return;
+          }
 
           // Set form data from fetched property
           setFormData({
@@ -86,8 +92,17 @@ const EditProperty = () => {
             amenities: property.amenities || [],
           });
 
-          // Set existing images
-          setExistingImages(property.images || []);
+          // Set existing images - handle both string URLs and object format
+          const images = property.images || [];
+          const imageUrls = images.map(img => {
+            if (typeof img === 'string') {
+              return img;
+            } else if (img && img.url) {
+              return img.url;
+            }
+            return img;
+          });
+          setExistingImages(imageUrls);
         }
       } catch (error) {
         console.error("Failed to fetch property:", error);
@@ -190,12 +205,14 @@ const EditProperty = () => {
         data.append(`amenities[${index}]`, amenity);
       });
 
-      // Append existing images that weren't removed
+      // Append existing images that weren't removed (as URLs)
       const remainingImages = existingImages.filter(
         (img) => !removedImages.includes(img)
       );
       remainingImages.forEach((imageUrl, index) => {
-        data.append(`existingImages[${index}]`, imageUrl);
+        // Send as string URL
+        const url = typeof imageUrl === 'string' ? imageUrl : (imageUrl.url || imageUrl);
+        data.append(`existingImages[${index}]`, url);
       });
 
       // Append new images
@@ -599,20 +616,26 @@ const EditProperty = () => {
               <h3 className="text-sm font-medium mb-3">Current Images</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {existingImages.map((imageUrl, index) => {
-                  const isRemoved = removedImages.includes(imageUrl);
+                  // Handle both string URLs and object format
+                  const url = typeof imageUrl === 'string' ? imageUrl : (imageUrl?.url || imageUrl);
+                  const isRemoved = removedImages.includes(url);
                   return (
                     <div key={index} className="relative group">
                       <img
-                        src={imageUrl}
+                        src={url}
                         alt={`Existing ${index}`}
                         className={`w-full h-32 object-cover rounded-lg ${
                           isRemoved ? "opacity-30" : ""
                         }`}
+                        onError={(e) => {
+                          console.error('Image load error:', url);
+                          e.target.style.display = 'none';
+                        }}
                       />
                       {isRemoved ? (
                         <button
                           type="button"
-                          onClick={() => restoreExistingImage(imageUrl)}
+                          onClick={() => restoreExistingImage(url)}
                           className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 text-xs rounded"
                         >
                           Restore
@@ -620,7 +643,7 @@ const EditProperty = () => {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => removeExistingImage(imageUrl)}
+                          onClick={() => removeExistingImage(url)}
                           className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
                         >
                           <X size={16} />

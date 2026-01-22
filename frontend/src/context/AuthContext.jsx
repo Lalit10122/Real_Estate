@@ -43,8 +43,16 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (response.data.success) {
-          setUser(response.data.user);
-          setIsBuyer(response.data.user.isBuyer);
+          const userData = response.data.user;
+          setUser({
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone || '',
+            isBuyer: userData.isBuyer,
+            role: userData.role,
+          });
+          setIsBuyer(userData.isBuyer);
           setIsAuthenticated(true);
           setToken(storedToken);
         } else {
@@ -81,6 +89,7 @@ export const AuthProvider = ({ children }) => {
           id: userId,
           name: userName,
           email,
+          phone: phone || '',
           isBuyer,
         });
         

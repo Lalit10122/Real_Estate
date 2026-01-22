@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import AuthContext from "../context/AuthContext";
 import {
   User,
   Mail,
@@ -23,17 +25,11 @@ import {
   Package,
 } from "lucide-react";
 
-// Mock AuthContext - replace with your actual context
-const AuthContext = React.createContext({
-  user: null,
-  isBuyer: true,
-  isSeller: false,
-  logout: () => {},
-});
+const API_URL = 'http://localhost:8081/api';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user: authUser, isBuyer, isSeller, logout } = useContext(AuthContext);
+  const { user: authUser, isBuyer, isSeller, logout, getAuthHeader, isAuthenticated, loading: authLoading } = useContext(AuthContext);
 
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,6 +43,13 @@ const Profile = () => {
     avatar: "",
     bio: "",
   });
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [stats, setStats] = useState({
     propertiesListed: 0,
     propertiesSold: 0,
@@ -56,58 +59,238 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    // Simulate fetching user data
-    setTimeout(() => {
-      const userData = authUser || {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "+91 98765 43210",
-        location: "Jaipur, Rajasthan",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-        bio: isSeller
-          ? "Professional real estate seller with 5+ years of experience"
-          : "Looking for the perfect property in Jaipur",
-        memberSince: "January 2024",
-        verified: true,
-        accountType: isSeller ? "Seller" : "Buyer",
-      };
-      setUser(userData);
-      setFormData(userData);
+    if (authLoading) {
+      return;
+    }
 
-      // Mock stats based on account type
-      if (isSeller) {
-        setStats({
-          propertiesListed: 12,
-          propertiesSold: 5,
-          savedProperties: 0,
-          totalViews: 2450,
-          inquiries: 48,
-        });
-      } else {
-        setStats({
-          propertiesListed: 0,
-          propertiesSold: 0,
-          savedProperties: 8,
-          totalViews: 0,
-          inquiries: 3,
-        });
+    const fetchUserProfile = async () => {
+      if (!isAuthenticated || !authUser) {
+        setLoading(false);
+        navigate('/login');
+        return;
       }
 
-      setLoading(false);
-    }, 500);
-  }, [authUser, isSeller]);
+      try {
+        console.log('Fetching profile data...', { authUser, isAuthenticated });
+        
+        const response = await axios.get(
+          `${API_URL}/properties/user/profile`,
+          { headers: getAuthHeader() }
+        );
+
+        console.log('Profile API response:', response.data);
+
+        if (response.data && response.data.success) {
+          const profileData = response.data.data;
+          const userData = profileData.user;
+          
+          console.log('User data from API:', userData);
+          
+          const memberSince = userData.createdAt 
+            ? new Date(userData.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+            : new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+          const phone = userData.phone || '';
+
+          const formattedUserData = {
+            id: userData.id,
+            name: userData.name || '',
+            email: userData.email || '',
+            phone: phone,
+            location: '',
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userData.name || 'User')}`,
+            bio: '',
+            memberSince: memberSince,
+            verified: true,
+            accountType: userData.isBuyer !== undefined ? (userData.isBuyer ? "Buyer" : "Seller") : (isSeller ? "Seller" : "Buyer"),
+          };
+
+          console.log('Setting user data:', formattedUserData);
+          setUser(formattedUserData);
+          setFormData(formattedUserData);
+
+          if (profileData.stats) {
+            if (isSeller) {
+              setStats({
+                propertiesListed: profileData.stats.totalProperties || 0,
+                propertiesSold: profileData.stats.soldProperties || 0,
+                savedProperties: 0,
+                totalViews: profileData.stats.totalViews || 0,
+                inquiries: profileData.stats.totalInquiries || 0,
+              });
+            } else {
+              setStats({
+                propertiesListed: 0,
+                propertiesSold: 0,
+                savedProperties: profileData.stats.totalFavorites || 0,
+                totalViews: 0,
+                inquiries: profileData.stats.totalInquiries || 0,
+              });
+            }
+          } else {
+            setStats({
+              propertiesListed: 0,
+              propertiesSold: 0,
+              savedProperties: 0,
+              totalViews: 0,
+              inquiries: 0,
+            });
+          }
+        } else {
+          throw new Error('Invalid response from server');
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        console.log('Using fallback data from authUser:', authUser);
+        
+        if (authUser && authUser.name && authUser.email) {
+          const userData = {
+            id: authUser.id,
+            name: authUser.name,
+            email: authUser.email,
+            phone: authUser.phone || '',
+            location: '',
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(authUser.name)}`,
+            bio: '',
+            memberSince: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            verified: true,
+            accountType: isSeller ? "Seller" : "Buyer",
+          };
+          console.log('Setting fallback user data:', userData);
+          setUser(userData);
+          setFormData(userData);
+          
+          setStats({
+            propertiesListed: 0,
+            propertiesSold: 0,
+            savedProperties: 0,
+            totalViews: 0,
+            inquiries: 0,
+          });
+        } else {
+          navigate('/login');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [authUser, isSeller, isAuthenticated, getAuthHeader, authLoading, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSaveProfile = () => {
-    // In production, save to backend
-    setUser(formData);
-    setIsEditing(false);
-    // Show success notification
-    alert("Profile updated successfully!");
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/users/profile`,
+        {
+          name: formData.name,
+          phone: formData.phone,
+          location: formData.location,
+          bio: formData.bio,
+        },
+        { headers: getAuthHeader() }
+      );
+
+      if (response.data && response.data.success) {
+        setUser(formData);
+        setIsEditing(false);
+        alert("Profile updated successfully!");
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      alert(error.response?.data?.message || "Failed to update profile. Please try again.");
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    // Validation
+    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      alert("Please fill in all password fields");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("New passwords do not match");
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      alert("New password must be at least 6 characters long");
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const response = await axios.put(
+        `${API_URL}/users/change-password`,
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
+        { headers: getAuthHeader() }
+      );
+
+      if (response.data && response.data.success) {
+        alert("Password updated successfully!");
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update password:', error);
+      alert(error.response?.data?.message || "Failed to update password. Please check your current password and try again.");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmMessage = "Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.";
+    
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    const doubleConfirm = window.prompt('Type "DELETE" to confirm account deletion:');
+    
+    if (doubleConfirm !== "DELETE") {
+      alert("Account deletion cancelled");
+      return;
+    }
+
+    setDeleteLoading(true);
+
+    try {
+      const response = await axios.delete(
+        `${API_URL}/users/account`,
+        { headers: getAuthHeader() }
+      );
+
+      if (response.data && response.data.success) {
+        alert("Your account has been deleted successfully");
+        if (logout) logout();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+      alert(error.response?.data?.message || "Failed to delete account. Please try again.");
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -377,7 +560,7 @@ const Profile = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   isEditing={isEditing}
-                  displayValue={user.phone}
+                  displayValue={user.phone || "Not provided"}
                 />
                 <InputField
                   icon={MapPin}
@@ -386,7 +569,7 @@ const Profile = () => {
                   value={formData.location}
                   onChange={handleInputChange}
                   isEditing={isEditing}
-                  displayValue={user.location}
+                  displayValue={user.location || "Not provided"}
                 />
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -516,21 +699,34 @@ const Profile = () => {
                   <div className="space-y-4">
                     <input
                       type="password"
+                      name="currentPassword"
                       placeholder="Current Password"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                     <input
                       type="password"
+                      name="newPassword"
                       placeholder="New Password"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
                     <input
                       type="password"
+                      name="confirmPassword"
                       placeholder="Confirm New Password"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     />
-                    <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md">
-                      Update Password
+                    <button 
+                      onClick={handleUpdatePassword}
+                      disabled={passwordLoading}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-md disabled:bg-blue-400 disabled:cursor-not-allowed"
+                    >
+                      {passwordLoading ? "Updating..." : "Update Password"}
                     </button>
                   </div>
                 </div>
@@ -545,8 +741,12 @@ const Profile = () => {
                     Once you delete your account, there is no going back. All
                     your data will be permanently removed.
                   </p>
-                  <button className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md">
-                    Delete Account
+                  <button 
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-md disabled:bg-red-400 disabled:cursor-not-allowed"
+                  >
+                    {deleteLoading ? "Deleting..." : "Delete Account"}
                   </button>
                 </div>
               </div>

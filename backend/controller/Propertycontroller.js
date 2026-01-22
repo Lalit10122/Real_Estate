@@ -408,6 +408,8 @@ export const getPropertyById = async (req, res) => {
 // @route   PUT /api/properties/:id
 // @access  Private (Owner only)
 export const updateProperty = async (req, res) => {
+  let uploadedImages = [];
+  
   try {
     const property = await propertyModel.findById(req.params.id);
 
@@ -418,13 +420,20 @@ export const updateProperty = async (req, res) => {
       });
     }
 
-    let newImages = [];
+    // Parse nested FormData fields into nested objects
+    const parsedBody = parseNestedFields(req.body);
+    console.log("Update - Parsed body:", JSON.stringify(parsedBody, null, 2));
 
     // Handle new image uploads
     if (req.files && req.files.length > 0) {
+      console.log("Uploading new images to Cloudinary...");
       const uploadPromises = req.files.map(async (file, index) => {
-        // Use buffer if available (memory storage), otherwise use path (disk storage)
+        try {
         const imageSource = file.buffer || file.path;
+          if (!imageSource) {
+            throw new Error(`No image source found for file ${index}`);
+          }
+          
         const result = await uploadToCloudinary(imageSource);
         return {
           url: result.url,
@@ -432,27 +441,252 @@ export const updateProperty = async (req, res) => {
           isPrimary: false,
           caption: req.body[`caption_${index}`] || file.originalname,
         };
+        } catch (uploadError) {
+          console.error(`Failed to upload image ${index}:`, uploadError);
+          throw uploadError;
+        }
       });
 
-      newImages = await Promise.all(uploadPromises);
+      uploadedImages = await Promise.all(uploadPromises);
+      console.log("New images uploaded successfully:", uploadedImages.length);
     }
 
-    // Merge existing images with new images
-    const updatedImages =
-      newImages.length > 0 ? [...property.images, ...newImages] : property.images;
+    // Handle existing images - get from existingImages array in FormData
+    let existingImagesToKeep = [];
+    if (parsedBody.existingImages && Object.keys(parsedBody.existingImages).length > 0) {
+      // existingImages can be an array or object with numeric keys from FormData
+      let existingImageUrls = [];
+      if (Array.isArray(parsedBody.existingImages)) {
+        existingImageUrls = parsedBody.existingImages;
+      } else if (typeof parsedBody.existingImages === 'object') {
+        existingImageUrls = Object.values(parsedBody.existingImages).filter(Boolean);
+      }
+      
+      console.log("Existing image URLs to keep:", existingImageUrls);
+      console.log("Property images:", property.images);
+      
+      // Match existing images from property.images by URL
+      // existingImageUrls contains URL strings, need to find matching image objects from property
+      existingImagesToKeep = property.images.filter(img => {
+        const imgUrl = typeof img === 'string' ? img : (img?.url || img);
+        // Check if this image URL is in the list of URLs to keep
+        return existingImageUrls.some(url => {
+          const urlStr = typeof url === 'string' ? url : (url?.url || url);
+          return imgUrl === urlStr || imgUrl === url || url === imgUrl;
+        });
+      });
+      
+      console.log("Matched images to keep:", existingImagesToKeep.length);
+    } else {
+      // If no existingImages specified, keep all current images
+      existingImagesToKeep = property.images || [];
+      console.log("No existing images specified, keeping all:", existingImagesToKeep.length);
+    }
 
-    // Property ownership already checked in middleware (req.property exists)
+    // Combine existing images with new uploaded images
+    const updatedImages = [...existingImagesToKeep, ...uploadedImages];
+    
+    // If no images at all, keep original images
+    const finalImages = updatedImages.length > 0 ? updatedImages : property.images;
+
+    // Clean and convert values like in createProperty
+    const cleanValue = (value) => {
+      if (value === '' || value === null) return undefined;
+      return value;
+    };
+
+    // Convert string numbers to actual numbers
+    if (parsedBody.area?.value !== undefined && parsedBody.area.value !== '') {
+      parsedBody.area.value = Number(parsedBody.area.value);
+    }
+    if (parsedBody.price?.amount !== undefined && parsedBody.price.amount !== '') {
+      parsedBody.price.amount = Number(parsedBody.price.amount);
+    }
+    if (parsedBody.price?.negotiable !== undefined) {
+      parsedBody.price.negotiable = parsedBody.price.negotiable === 'true' || parsedBody.price.negotiable === true;
+    }
+    if (parsedBody.features?.floorNumber !== undefined && parsedBody.features.floorNumber !== '') {
+      parsedBody.features.floorNumber = Number(parsedBody.features.floorNumber);
+    }
+    if (parsedBody.features?.totalFloors !== undefined && parsedBody.features.totalFloors !== '') {
+      parsedBody.features.totalFloors = Number(parsedBody.features.totalFloors);
+    }
+    if (parsedBody.features?.parking?.covered !== undefined && parsedBody.features.parking.covered !== '') {
+      parsedBody.features.parking.covered = Number(parsedBody.features.parking.covered);
+    }
+    if (parsedBody.features?.parking?.open !== undefined && parsedBody.features.parking.open !== '') {
+      parsedBody.features.parking.open = Number(parsedBody.features.parking.open);
+    }
+    if (parsedBody.features?.balconies !== undefined && parsedBody.features.balconies !== '') {
+      parsedBody.features.balconies = Number(parsedBody.features.balconies);
+    }
+
+    // Handle amenities array
+    if (parsedBody.amenities && typeof parsedBody.amenities === 'object' && !Array.isArray(parsedBody.amenities)) {
+      parsedBody.amenities = Object.values(parsedBody.amenities).filter(Boolean);
+    }
+
+    // Remove undefined values
+    Object.keys(parsedBody).forEach(key => {
+      if (parsedBody[key] === undefined) {
+        delete parsedBody[key];
+      }
+    });
+
+    if (parsedBody.features) {
+      Object.keys(parsedBody.features).forEach(key => {
+        if (parsedBody.features[key] === undefined) {
+          delete parsedBody.features[key];
+        }
+      });
+    }
+
+    // Remove existingImages from parsedBody as we've already processed it
+    delete parsedBody.existingImages;
+
+    // Ensure images are in correct format (objects with url property)
+    const formattedImages = finalImages.map((img, index) => {
+      if (typeof img === 'string') {
+        // Convert string URL to object format
+        return {
+          url: img,
+          isPrimary: index === 0,
+          caption: '',
+        };
+      } else if (img && img.url) {
+        // Already in correct format, ensure isPrimary is set correctly
+        return {
+          url: img.url,
+          publicId: img.publicId,
+          isPrimary: index === 0 || img.isPrimary || false,
+          caption: img.caption || '',
+        };
+      }
+      return img;
+    });
+
+    // Ensure at least one image exists (required by schema)
+    if (formattedImages.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one image is required",
+      });
+    }
+
+    // Build update data carefully to preserve required fields
+    const updateData = {};
+    
+    // Preserve userId (required)
+    updateData.userId = property.userId;
+    
+    // Update simple fields from parsedBody
+    if (parsedBody.description !== undefined) updateData.description = parsedBody.description;
+    if (parsedBody.propertyType !== undefined) updateData.propertyType = parsedBody.propertyType;
+    if (parsedBody.listingType !== undefined) updateData.listingType = parsedBody.listingType;
+    if (parsedBody.status !== undefined) updateData.status = parsedBody.status;
+    if (parsedBody.amenities !== undefined) updateData.amenities = parsedBody.amenities;
+    
+    // Merge owner object - preserve all required fields
+    if (parsedBody.owner) {
+      updateData.owner = {
+        id: parsedBody.owner.id || property.owner?.id || req.userId,
+        name: parsedBody.owner.name || property.owner?.name || '',
+        phone: parsedBody.owner.phone || property.owner?.phone || '',
+        email: parsedBody.owner.email || property.owner?.email || '',
+        type: parsedBody.owner.type || property.owner?.type || 'owner',
+        verified: parsedBody.owner.verified !== undefined ? parsedBody.owner.verified : (property.owner?.verified || false),
+      };
+    } else {
+      updateData.owner = property.owner;
+    }
+    
+    // Merge location object - preserve all required fields
+    if (parsedBody.location) {
+      updateData.location = {
+        address: parsedBody.location.address || property.location?.address || '',
+        area: parsedBody.location.area || property.location?.area || '',
+        city: parsedBody.location.city || property.location?.city || '',
+        state: parsedBody.location.state || property.location?.state || '',
+        pincode: parsedBody.location.pincode || property.location?.pincode || '',
+        landmark: parsedBody.location.landmark || property.location?.landmark,
+        coordinates: parsedBody.location.coordinates || property.location?.coordinates,
+        nearby: parsedBody.location.nearby || property.location?.nearby,
+      };
+    } else {
+      updateData.location = property.location;
+    }
+    
+    // Merge area object - preserve all required fields
+    if (parsedBody.area) {
+      updateData.area = {
+        value: parsedBody.area.value !== undefined ? parsedBody.area.value : property.area?.value,
+        unit: parsedBody.area.unit || property.area?.unit || 'sqft',
+      };
+    } else {
+      updateData.area = property.area;
+    }
+    
+    // Merge price object - preserve all required fields
+    if (parsedBody.price) {
+      updateData.price = {
+        amount: parsedBody.price.amount !== undefined ? parsedBody.price.amount : property.price?.amount,
+        display: parsedBody.price.display || property.price?.display,
+        negotiable: parsedBody.price.negotiable !== undefined ? parsedBody.price.negotiable : (property.price?.negotiable || false),
+        pricePerSqft: parsedBody.price.pricePerSqft || property.price?.pricePerSqft,
+      };
+    } else {
+      updateData.price = property.price;
+    }
+    
+    // Merge features object
+    if (parsedBody.features) {
+      updateData.features = {
+        ...property.features,
+        ...parsedBody.features,
+      };
+    } else {
+      updateData.features = property.features;
+    }
+    
+    // Set images
+    updateData.images = formattedImages;
+
+    // Ensure all required fields are present (don't remove them even if undefined in parsedBody)
+    // Required fields are already set above, so we just need to clean up optional undefined values
+    
+    // Clean up optional fields only (not required ones)
+    if (updateData.features) {
+      Object.keys(updateData.features).forEach(key => {
+        if (updateData.features[key] === undefined && key !== 'parking') {
+          delete updateData.features[key];
+        }
+      });
+      // Ensure parking object exists
+      if (updateData.features.parking) {
+        if (updateData.features.parking.covered === undefined) updateData.features.parking.covered = 0;
+        if (updateData.features.parking.open === undefined) updateData.features.parking.open = 0;
+      }
+    }
+
+    console.log("Updating property with data:", JSON.stringify(updateData, null, 2));
+    console.log("Property ID:", req.params.id);
+
+    // Update the property - findByIdAndUpdate automatically uses $set
     const updatedProperty = await propertyModel.findByIdAndUpdate(
       req.params.id,
-      {
-        ...req.body,
-        images: updatedImages,
-      },
+      updateData,
       {
         new: true,
         runValidators: true,
       }
     );
+
+    if (!updatedProperty) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found after update",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -460,10 +694,44 @@ export const updateProperty = async (req, res) => {
       data: updatedProperty,
     });
   } catch (error) {
-    res.status(400).json({
+    console.error("========================================");
+    console.error("Update property error:", error.message);
+    console.error("Error name:", error.name);
+    console.error("Error code:", error.code);
+    console.error("Full error:", error);
+    if (error.errors) {
+      console.error("Validation errors:", JSON.stringify(error.errors, null, 2));
+    }
+    console.error("Error stack:", error.stack);
+    console.error("========================================");
+    
+    // Clean up uploaded images if update fails
+    if (uploadedImages.length > 0) {
+      console.log("Cleaning up uploaded images due to error...");
+      uploadedImages.forEach((img) => {
+        if (img.publicId) {
+          deleteFromCloudinary(img.publicId).catch(cleanupError => {
+            console.error("Failed to cleanup image:", cleanupError);
+          });
+        }
+      });
+    }
+    
+    const isValidationError =
+      error?.name === "ValidationError" ||
+      error?.code === 121 || // Mongo document validation error
+      error?.message?.toLowerCase?.().includes("validation");
+
+    res.status(isValidationError ? 400 : 500).json({
       success: false,
       message: "Failed to update property",
       error: error.message,
+      validationErrors: error?.errors
+        ? Object.fromEntries(
+            Object.entries(error.errors).map(([k, v]) => [k, v?.message || String(v)])
+          )
+        : undefined,
+      details: process.env.NODE_ENV === "development" ? error.stack : undefined,
     });
   }
 };
@@ -473,7 +741,8 @@ export const updateProperty = async (req, res) => {
 // @access  Private (Owner only)
 export const deleteProperty = async (req, res) => {
   try {
-    const property = await propertyModel.findById(req.params.id);
+    const propertyId = req.params.id;
+    const property = await propertyModel.findById(propertyId);
 
     if (!property) {
       return res.status(404).json({
@@ -482,23 +751,43 @@ export const deleteProperty = async (req, res) => {
       });
     }
 
+    // Verify ownership (additional check)
+    const propertyUserId = property.userId?.toString();
+    const ownerId = property.owner?.id?.toString();
+    const currentUserId = req.userId?.toString();
+    
+    if (propertyUserId !== currentUserId && ownerId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this property",
+      });
+    }
+
     // Delete all images from Cloudinary
     if (property.images && property.images.length > 0) {
       const deletePromises = property.images.map((img) => {
-        if (img.publicId) {
-          return deleteFromCloudinary(img.publicId);
+        if (img && img.publicId) {
+          return deleteFromCloudinary(img.publicId).catch(err => {
+            console.error('Error deleting image from Cloudinary:', err);
+            // Continue even if image deletion fails
+            return null;
+          });
         }
-      });
+        return null;
+      }).filter(p => p !== null);
+      
+      if (deletePromises.length > 0) {
       await Promise.all(deletePromises);
+      }
     }
 
-    // Property ownership already checked in middleware (req.property exists)
-    await propertyModel.findByIdAndDelete(req.params.id);
+    // Delete the property
+    await propertyModel.findByIdAndDelete(propertyId);
 
     // Remove property ID from user's propertyDataId array
     await userModel.findByIdAndUpdate(
       req.userId,
-      { $pull: { propertyDataId: req.params.id } },
+      { $pull: { propertyDataId: propertyId } },
       { new: true }
     );
 
@@ -507,6 +796,7 @@ export const deleteProperty = async (req, res) => {
       message: "Property deleted successfully",
     });
   } catch (error) {
+    console.error("Delete property error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to delete property",
@@ -600,7 +890,11 @@ export const getPropertiesByUser = async (req, res) => {
     const userId = req.userId;
     const { page = 1, limit = 10, status } = req.query;
 
-    const query = { userId };
+    console.log("Fetching properties for user:", userId);
+
+    // Query by userId - MongoDB will handle ObjectId comparison automatically
+    // Try both direct match and string conversion
+    const query = { userId: userId };
 
     // Optionally filter by status
     if (status) {
@@ -617,6 +911,8 @@ export const getPropertiesByUser = async (req, res) => {
       .skip(skip)
       .limit(Number(limit));
 
+    console.log(`Found ${properties.length} properties for user ${userId}`);
+
     res.status(200).json({
       success: true,
       count: properties.length,
@@ -626,6 +922,7 @@ export const getPropertiesByUser = async (req, res) => {
       data: properties,
     });
   } catch (error) {
+    console.error("Error fetching user properties:", error);
     res.status(500).json({
       success: false,
       message: "Failed to fetch user properties",
@@ -907,6 +1204,7 @@ export const getUserProfile = async (req, res) => {
           id: user._id,
           name: user.name,
           email: user.email,
+          phone: user.phone || '',
           isBuyer: user.isBuyer,
           createdAt: user.createdAt,
         },

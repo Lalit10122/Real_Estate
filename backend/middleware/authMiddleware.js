@@ -107,7 +107,7 @@ export const checkOwnership = (model) => {
 export const checkPropertyOwnership = async (req, res, next) => {
   try {
     // Import here to avoid circular dependency
-    const propertyModel = (await import("./propertyData.model.js")).default;
+    const propertyModel = (await import("../models/propertyData.model.js")).default;
     
     const property = await propertyModel.findById(req.params.id);
 
@@ -120,7 +120,11 @@ export const checkPropertyOwnership = async (req, res, next) => {
 
     // Check if user owns the property
     // Compare userId field in property with authenticated user's ID
-    if (property.userId !== req.userId && property.owner.id !== req.userId) {
+    const propertyUserId = property.userId?.toString();
+    const ownerId = property.owner?.id?.toString();
+    const currentUserId = req.userId?.toString();
+    
+    if (propertyUserId !== currentUserId && ownerId !== currentUserId) {
       return res.status(403).json({
         success: false,
         message: "You are not authorized to modify this property",
@@ -131,6 +135,7 @@ export const checkPropertyOwnership = async (req, res, next) => {
     req.property = property;
     next();
   } catch (error) {
+    console.error("Property ownership check error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error in ownership check",

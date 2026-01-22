@@ -150,10 +150,10 @@ const MyProperties = () => {
             >
               {/* Property Image */}
               <Link to={`/property/${property._id}`}>
-                {property.images && property.images[0] ? (
+                {property.images && property.images.length > 0 ? (
                   <img
-                    src={property.images[0].url}
-                    alt={property.description}
+                    src={typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url || property.images[0]}
+                    alt={property.description || 'Property'}
                     className="w-full h-48 object-cover"
                   />
                 ) : (
@@ -179,35 +179,35 @@ const MyProperties = () => {
                 {/* Description */}
                 <Link to={`/property/${property._id}`}>
                   <h3 className="font-semibold text-lg mb-2 hover:text-blue-600 line-clamp-2">
-                    {property.description.substring(0, 80)}...
+                    {property.description ? (property.description.length > 80 ? property.description.substring(0, 80) + '...' : property.description) : 'No description'}
                   </h3>
                 </Link>
 
                 {/* Location */}
                 <p className="text-sm text-gray-600 mb-2">
-                  {property.location.area}, {property.location.city}
+                  {property.location?.area || ''}, {property.location?.city || ''}
                 </p>
 
                 {/* Price */}
                 <p className="text-xl font-bold text-blue-600 mb-3">
                   ₹
-                  {property.price.display ||
-                    property.price.amount.toLocaleString()}
+                  {property.price?.display ||
+                    (property.price?.amount ? property.price.amount.toLocaleString() : 'N/A')}
                 </p>
 
                 {/* Metrics */}
                 <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-1">
                     <Eye size={16} />
-                    <span>{property.metrics.views}</span>
+                    <span>{property.metrics?.views || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Heart size={16} />
-                    <span>{property.metrics.favorites}</span>
+                    <span>{property.metrics?.favorites || 0}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MessageSquare size={16} />
-                    <span>{property.metrics.inquiries}</span>
+                    <span>{property.metrics?.inquiries || 0}</span>
                   </div>
                 </div>
 

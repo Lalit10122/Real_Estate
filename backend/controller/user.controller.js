@@ -13,7 +13,7 @@ const createToken = (id) => {
 const logInUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // Validate input
     if (!email || !password) {
       return res.status(400).json({
@@ -23,7 +23,7 @@ const logInUser = async (req, res) => {
     }
 
     const user = await userModel.findOne({ email });
-    
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -108,11 +108,11 @@ const registerUser = async (req, res) => {
     const newUser = new userModel({
       name,
       email,
-      phone: phone || '',
+      phone: phone || "",
       password: hashPass,
       isBuyer: true, // Default is buyer
     });
-    
+
     const user = await newUser.save();
 
     // Generate token
@@ -184,11 +184,11 @@ const registerSeller = async (req, res) => {
     const newUser = new userModel({
       name,
       email,
-      phone: phone || '',
+      phone: phone || "",
       password: hashPass,
       isBuyer: false, // Seller
     });
-    
+
     const user = await newUser.save();
 
     // Generate token
@@ -286,6 +286,7 @@ const isTokenCorrect = async (req, res) => {
         id: req.user._id,
         name: req.user.name,
         email: req.user.email,
+        phone: req.user.phone || "",
         isBuyer: req.user.isBuyer,
         role: req.user.role,
       },
@@ -299,7 +300,140 @@ const isTokenCorrect = async (req, res) => {
   }
 };
 
-export { logInUser, registerUser, registerSeller, logInAdmin, isTokenCorrect };
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id; // Changed from req.user.id to req.user._id
+    const { name, phone, location, bio } = req.body;
+
+    const updatedUser = await userModel
+      .findByIdAndUpdate(
+        userId,
+        { name, phone, location, bio },
+        { new: true, runValidators: true },
+      )
+      .select("-password");
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.log("Update Profile Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Change password
+// @route   PUT /api/users/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user._id; // Changed from req.user.id to req.user._id
+    const { currentPassword, newPassword } = req.body;
+
+    // Validation
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide both current and new password",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 8 characters long",
+      });
+    }
+
+    // Find user with password field
+    const user = await userModel.findById(userId).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Verify current password using bcrypt.compare directly
+    const isPasswordCorrect = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Hash and update new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.log("Change Password Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update password",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Delete account
+// @route   DELETE /api/users/account
+// @access  Private
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user._id; // Changed from req.user.id to req.user._id
+
+    // Optional: Delete all user's properties, favorites, etc.
+    // await propertyModel.deleteMany({ userId });
+    // await favoriteModel.deleteMany({ userId });
+
+    // Delete user
+    await userModel.findByIdAndDelete(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    console.log("Delete Account Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete account",
+      error: error.message,
+    });
+  }
+};
+
+export {
+  logInUser,
+  registerUser,
+  registerSeller,
+  logInAdmin,
+  isTokenCorrect,
+  updateProfile,
+  changePassword,
+  deleteAccount,
+};
 
 // Note: Fixed typo in original function name from "isTokenCoreect" to "isTokenCorrect"
 export { isTokenCorrect as isTokenCoreect };

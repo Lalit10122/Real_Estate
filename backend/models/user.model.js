@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
-      default: '',
+      default: "",
     },
     password: {
       type: String,
@@ -29,6 +30,8 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: true, // true = buyer, false = seller
     },
+    location: { type: String, default: "" }, // Add this
+    bio: { type: String, default: "" },
     propertyDataId: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "Property", // Reference to Property model
@@ -40,9 +43,9 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
   },
-  { 
-    timestamps: true // Adds createdAt and updatedAt automatically
-  }
+  {
+    timestamps: true, // Adds createdAt and updatedAt automatically
+  },
 );
 
 // Index for faster email lookups
@@ -70,7 +73,7 @@ userSchema.methods.addProperty = async function (propertyId) {
 // Method to remove property from user's list
 userSchema.methods.removeProperty = async function (propertyId) {
   this.propertyDataId = this.propertyDataId.filter(
-    (id) => id.toString() !== propertyId.toString()
+    (id) => id.toString() !== propertyId.toString(),
   );
   await this.save();
   return this;
@@ -84,6 +87,10 @@ userSchema.set("toJSON", {
     return ret;
   },
 });
+
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 const userModel = mongoose.model("User", userSchema);
 
