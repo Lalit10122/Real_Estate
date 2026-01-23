@@ -13,6 +13,7 @@ import {
   LogIn,
   UserPlus,
   LogOut,
+  Calculator,
 } from "lucide-react";
 import gsap from "gsap";
 import { useContext } from "react";
@@ -36,6 +37,7 @@ const Header = () => {
   const buyerNavItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/search", label: "Search", icon: Search },
+    { path: "/ml-calculator", label: "ROI Calculator", icon: Calculator },
   ];
 
   // Seller Navigation Items
