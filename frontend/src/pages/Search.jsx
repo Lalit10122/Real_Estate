@@ -1,269 +1,316 @@
-import React, { useState, useEffect } from 'react'
-import { Home, X, ChevronUp, ChevronDown, IndianRupee, MapPin, Grid2x2Plus, Ruler, SquarePlus, Trees, Search as SearchIcon, SlidersHorizontal } from 'lucide-react'
-import PriceRangeSlider from '../components/PriceRangeSlider'
-import LocationSelector from '../components/LocationSelector'
-import BedroomBathroomSelector from '../components/BedroomBathroomSelector'
-import AreaRangeSlider from '../components/AreaRangeSlider'
-import FeaturesSelector from '../components/FeaturesSelector'
-import PropertyToggles from '../components/PropertyToggles'
-import PropertyCard from '../components/PropertyCard'
+import React, { useState, useEffect } from "react";
+import {
+  Home,
+  X,
+  ChevronUp,
+  ChevronDown,
+  IndianRupee,
+  MapPin,
+  Grid2x2Plus,
+  Ruler,
+  SquarePlus,
+  Trees,
+  Search as SearchIcon,
+  SlidersHorizontal,
+} from "lucide-react";
+import PriceRangeSlider from "../components/PriceRangeSlider";
+import LocationSelector from "../components/LocationSelector";
+import BedroomBathroomSelector from "../components/BedroomBathroomSelector";
+import AreaRangeSlider from "../components/AreaRangeSlider";
+import FeaturesSelector from "../components/FeaturesSelector";
+import PropertyToggles from "../components/PropertyToggles";
+import PropertyCard from "../components/PropertyCard";
+import axios from "axios";
+import SkeletonLoader from "../components/PropertyCardSkeleton";
+import { useLocation } from "react-router-dom";
 
-import propertyData from '../assets/Data/Property'
-import SkeletonLoader from '../components/PropertyCardSkeleton'
+const API_URL = "http://localhost:8081/api";
 
 const Search = () => {
+  const location = useLocation();
+  const searchParams = location.state;
+
   // Filter States
-  const [isBuy, setisBuy] = useState(true)
-  const [propertyType, setpropertyType] = useState("")
-  const [startPriceRange, setstartPriceRange] = useState("")
-  const [endPriceRange, setendPriceRange] = useState("")
-  const [state, setstate] = useState("")
-  const [city, setcity] = useState("")
-  const [area, setarea] = useState("")
-  const [pinCode, setpinCode] = useState("")
-  const [bedRooms, setbedRooms] = useState([])
-  const [bathRooms, setbathRooms] = useState([])
-  const [startArea, setstartArea] = useState("")
-  const [endArea, setendArea] = useState("")
+
+  const [isBuy, setisBuy] = useState(true);
+  const [propertyType, setpropertyType] = useState("");
+  const [startPriceRange, setstartPriceRange] = useState("");
+  const [endPriceRange, setendPriceRange] = useState("");
+  const [state, setstate] = useState("");
+  const [city, setcity] = useState("");
+  const [area, setarea] = useState("");
+  const [pinCode, setpinCode] = useState("");
+  const [bedRooms, setbedRooms] = useState([]);
+  const [bathRooms, setbathRooms] = useState([]);
+  const [startArea, setstartArea] = useState("");
+  const [endArea, setendArea] = useState("");
 
   // Features
-  const [furnishingStatus, setfurnishingStatus] = useState("")
-  const [possessionStatus, setpossessionStatus] = useState("")
-  const [propertyAge, setpropertyAge] = useState("")
-  const [facingDirection, setfacingDirection] = useState("")
+  const [furnishingStatus, setfurnishingStatus] = useState("");
+  const [possessionStatus, setpossessionStatus] = useState("");
+  const [propertyAge, setpropertyAge] = useState("");
+  const [facingDirection, setfacingDirection] = useState("");
 
   // Toggles
-  const [igVerifiedProperty, setigVerifiedProperty] = useState(false)
-  const [isFeaturedProperty, setisFeaturedProperty] = useState(false)
-  const [isParking, setisParking] = useState(false)
-  const [immediatelyAvailable, setimmediatelyAvailable] = useState(false)
+  const [igVerifiedProperty, setigVerifiedProperty] = useState(false);
+  const [isFeaturedProperty, setisFeaturedProperty] = useState(false);
+  const [isParking, setisParking] = useState(false);
+  const [immediatelyAvailable, setimmediatelyAvailable] = useState(false);
 
   // Shown States
-  const [isPropertyTypeShowm, setisPropertyTypeShowm] = useState(false)
-  const [isPriceRangeShown, setisPriceRangeShown] = useState(false)
-  const [isLocationShown, setisLocationShown] = useState(false)
-  const [isbedroomShown, setisbedroomShown] = useState(false)
-  const [isAreaShown, setisAreaShown] = useState(false)
-  const [isFeaturesShown, setisFeaturesShown] = useState(false)
+  const [isPropertyTypeShowm, setisPropertyTypeShowm] = useState(false);
+  const [isPriceRangeShown, setisPriceRangeShown] = useState(false);
+  const [isLocationShown, setisLocationShown] = useState(false);
+  const [isbedroomShown, setisbedroomShown] = useState(false);
+  const [isAreaShown, setisAreaShown] = useState(false);
+  const [isFeaturesShown, setisFeaturesShown] = useState(false);
 
   // Search Results States
-  const [filteredProperties, setFilteredProperties] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [showMobileFilter, setShowMobileFilter] = useState(false)
+  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   // Check if any filters are active (excluding default city filter)
   const hasActiveFilters = () => {
-    return propertyType || startPriceRange || endPriceRange || 
-           state || city || area || pinCode || 
-           bedRooms.length > 0 || bathRooms.length > 0 || 
-           startArea || endArea || 
-           furnishingStatus || possessionStatus || propertyAge || 
-           facingDirection || igVerifiedProperty || isFeaturedProperty || 
-           isParking || immediatelyAvailable;
-  }
+    return (
+      propertyType ||
+      startPriceRange ||
+      endPriceRange ||
+      state ||
+      city ||
+      area ||
+      pinCode ||
+      bedRooms.length > 0 ||
+      bathRooms.length > 0 ||
+      startArea ||
+      endArea ||
+      furnishingStatus ||
+      possessionStatus ||
+      propertyAge ||
+      facingDirection ||
+      igVerifiedProperty ||
+      isFeaturedProperty ||
+      isParking ||
+      immediatelyAvailable
+    );
+  };
 
-  // Filter Properties
-  const filterProperties = () => {
-    setIsLoading(true)
+  // Fetch & Filter Properties (server + client filters)
+  const filterProperties = async () => {
+    try {
+      setIsLoading(true);
 
-    setTimeout(() => {
-      let results = [...propertyData]
+      // Build query params for backend
+      const params = {
+        status: "active",
+        page: 1,
+        limit: 60,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        listingType: isBuy ? "sell" : "rent",
+      };
 
-      // Filter by listing type (Buy/Rent)
-      results = results.filter(property => 
-        property.listingType === (isBuy ? 'sell' : 'rent')
-      )
-
-      // If no filters are active, show first 10 properties from Jaipur
+      // Default "no filters" view = Jaipur properties
       if (!hasActiveFilters()) {
-        const jaipurProperties = results.filter(property => 
-          property.location.city === 'Jaipur'
-        );
-        setFilteredProperties(jaipurProperties.slice(0, 10));
-        setIsLoading(false);
-        return;
+        params.city = "Jaipur";
+        params.limit = 10;
+      } else {
+        if (propertyType) params.propertyType = propertyType;
+        if (city) params.city = city;
+        if (area) params.area = area;
+        if (startPriceRange) params.minPrice = startPriceRange;
+        if (endPriceRange) params.maxPrice = endPriceRange;
+        if (startArea) params.minArea = startArea;
+        if (endArea) params.maxArea = endArea;
+        if (furnishingStatus) params.furnished = furnishingStatus;
+        if (igVerifiedProperty) params.isVerified = true;
+        if (isFeaturedProperty) params.isFeatured = true;
       }
 
-      // Apply all filters
-      if (propertyType) {
-        results = results.filter(property => 
-          property.propertyType === propertyType
-        )
-      }
+      const response = await axios.get(`${API_URL}/properties`, { params });
+      let results = Array.isArray(response.data?.data)
+        ? response.data.data
+        : [];
 
-      if (startPriceRange || endPriceRange) {
-        results = results.filter(property => {
-          const price = property.price.amount
-          const minPrice = startPriceRange || 0
-          const maxPrice = endPriceRange || Infinity
-          return price >= minPrice && price <= maxPrice
-        })
-      }
+      // Normalize id for frontend components
+      results = results.map((p) => ({ ...p, id: p._id || p.id }));
 
+      // Apply remaining filters client-side where backend has no direct field
       if (state) {
-        results = results.filter(property => 
-          property.location.state === state
-        )
+        results = results.filter(
+          (property) => property.location?.state === state,
+        );
       }
-      if (city) {
-        results = results.filter(property => 
-          property.location.city === city
-        )
-      }
-      if (area) {
-        results = results.filter(property => 
-          property.location.area.toLowerCase().includes(area.toLowerCase())
-        )
-      }
+
       if (pinCode) {
-        results = results.filter(property => 
-          property.location.pincode === pinCode
-        )
+        results = results.filter(
+          (property) => property.location?.pincode === pinCode,
+        );
       }
 
       if (bedRooms.length > 0) {
-        results = results.filter(property => {
-          const bhk = property.description?.match(/(\d+)BHK/)?.[1]
-          return bedRooms.includes(bhk) || bedRooms.includes(bhk + '+')
-        })
-      }
-
-      if (startArea || endArea) {
-        results = results.filter(property => {
-          const propertyArea = property.area.value
-          const minArea = startArea || 0
-          const maxArea = endArea || Infinity
-          return propertyArea >= minArea && propertyArea <= maxArea
-        })
-      }
-
-      if (furnishingStatus) {
-        results = results.filter(property => 
-          property.features?.furnished === furnishingStatus
-        )
-      }
-
-      if (possessionStatus) {
-        results = results.filter(property => 
-          property.features?.possession === possessionStatus
-        )
-      }
-
-      if (propertyAge) {
-        results = results.filter(property => 
-          property.features?.age === propertyAge
-        )
+        results = results.filter((property) => {
+          const bhk = property.description?.match(/(\d+)BHK/)?.[1];
+          return bhk
+            ? bedRooms.includes(bhk) || bedRooms.includes(bhk + "+")
+            : false;
+        });
       }
 
       if (facingDirection) {
-        results = results.filter(property => 
-          property.features?.facing === facingDirection
-        )
+        results = results.filter(
+          (property) => property.features?.facing === facingDirection,
+        );
       }
 
-      if (igVerifiedProperty) {
-        results = results.filter(property => property.isVerified === true)
+      if (propertyAge) {
+        results = results.filter(
+          (property) => property.features?.age === propertyAge,
+        );
       }
 
-      if (isFeaturedProperty) {
-        results = results.filter(property => property.isFeatured === true)
+      if (possessionStatus) {
+        results = results.filter(
+          (property) => property.features?.possession === possessionStatus,
+        );
       }
 
       if (isParking) {
-        results = results.filter(property => 
-          property.features?.parking && 
-          (property.features.parking.covered > 0 || property.features.parking.open > 0)
-        )
+        results = results.filter(
+          (property) =>
+            property.features?.parking &&
+            ((property.features.parking.covered || 0) > 0 ||
+              (property.features.parking.open || 0) > 0),
+        );
       }
 
       if (immediatelyAvailable) {
-        results = results.filter(property => 
-          property.availability?.immediatelyAvailable === true
-        )
+        results = results.filter(
+          (property) => property.availability?.immediatelyAvailable === true,
+        );
       }
 
-      setFilteredProperties(results)
-      setIsLoading(false)
-    }, 800)
-  }
+      setFilteredProperties(results);
+    } catch (error) {
+      console.error("Failed to fetch properties:", error);
+      setFilteredProperties([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    filterProperties()
+    filterProperties();
   }, [
-    isBuy, propertyType, startPriceRange, endPriceRange, 
-    state, city, area, pinCode, bedRooms, bathRooms,
-    startArea, endArea, furnishingStatus,
-    possessionStatus, propertyAge, facingDirection,
-    igVerifiedProperty, isFeaturedProperty, isParking, immediatelyAvailable
-  ])
+    isBuy,
+    propertyType,
+    startPriceRange,
+    endPriceRange,
+    state,
+    city,
+    area,
+    pinCode,
+    bedRooms,
+    bathRooms,
+    startArea,
+    endArea,
+    furnishingStatus,
+    possessionStatus,
+    propertyAge,
+    facingDirection,
+    igVerifiedProperty,
+    isFeaturedProperty,
+    isParking,
+    immediatelyAvailable,
+  ]);
+
+  useEffect(() => {
+    if (searchParams) {
+      // Set the filters from home page
+      if (searchParams.isBuy !== undefined) {
+        setisBuy(searchParams.isBuy);
+      }
+      if (searchParams.city) {
+        setcity(searchParams.city);
+      }
+      if (searchParams.propertyType) {
+        setpropertyType(searchParams.propertyType);
+      }
+      if (searchParams.priceRange) {
+        const [min, max] = searchParams.priceRange.split("-");
+        setstartPriceRange(min);
+        setendPriceRange(max);
+      }
+    }
+  }, [searchParams]);
 
   const clearAllFilters = () => {
-    setisBuy(true)
-    setpropertyType("")
-    setstartPriceRange("")
-    setendPriceRange("")
-    setstate("")
-    setcity("")
-    setarea("")
-    setpinCode("")
-    setbedRooms([])
-    setbathRooms([])
-    setstartArea("")
-    setendArea("")
-    setfurnishingStatus("")
-    setpossessionStatus("")
-    setpropertyAge("")
-    setfacingDirection("")
-    setigVerifiedProperty(false)
-    setisFeaturedProperty(false)
-    setisParking(false)
-    setimmediatelyAvailable(false)
-  }
+    setisBuy(true);
+    setpropertyType("");
+    setstartPriceRange("");
+    setendPriceRange("");
+    setstate("");
+    setcity("");
+    setarea("");
+    setpinCode("");
+    setbedRooms([]);
+    setbathRooms([]);
+    setstartArea("");
+    setendArea("");
+    setfurnishingStatus("");
+    setpossessionStatus("");
+    setpropertyAge("");
+    setfacingDirection("");
+    setigVerifiedProperty(false);
+    setisFeaturedProperty(false);
+    setisParking(false);
+    setimmediatelyAvailable(false);
+  };
 
   const getActiveFilterCount = () => {
-    let count = 0
-    if (propertyType) count++
-    if (startPriceRange || endPriceRange) count++
-    if (state || city || area || pinCode) count++
-    if (bedRooms.length > 0) count++
-    if (bathRooms.length > 0) count++
-    if (startArea || endArea) count++
-    if (furnishingStatus) count++
-    if (possessionStatus) count++
-    if (propertyAge) count++
-    if (facingDirection) count++
-    if (igVerifiedProperty) count++
-    if (isFeaturedProperty) count++
-    if (isParking) count++
-    if (immediatelyAvailable) count++
-    return count
-  }
+    let count = 0;
+    if (propertyType) count++;
+    if (startPriceRange || endPriceRange) count++;
+    if (state || city || area || pinCode) count++;
+    if (bedRooms.length > 0) count++;
+    if (bathRooms.length > 0) count++;
+    if (startArea || endArea) count++;
+    if (furnishingStatus) count++;
+    if (possessionStatus) count++;
+    if (propertyAge) count++;
+    if (facingDirection) count++;
+    if (igVerifiedProperty) count++;
+    if (isFeaturedProperty) count++;
+    if (isParking) count++;
+    if (immediatelyAvailable) count++;
+    return count;
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop Filter Sidebar */}
-      <div className='w-1/3 bg-gray-100 hidden lg:block rounded-[10px] shadow-md m-2 pb-1.5 h-screen overflow-y-auto sticky top-2'>
-        <div className='border-b-[1px] border-gray-300 bg-white rounded-t-[10px] sticky top-0 z-10'>
-          <div className='flex justify-between mt-4 p-2 border-b-[1px] border-gray-300'>
-            <h1 className='text-3xl m-2'>Property Filters</h1>
-            <div 
+      <div className="w-1/3 bg-gray-100 hidden lg:block rounded-[10px] shadow-md m-2 pb-1.5 h-screen overflow-y-auto sticky top-2">
+        <div className="border-b-[1px] border-gray-300 bg-white rounded-t-[10px] sticky top-0 z-10">
+          <div className="flex justify-between mt-4 p-2 border-b-[1px] border-gray-300">
+            <h1 className="text-3xl m-2">Property Filters</h1>
+            <div
               onClick={clearAllFilters}
-              className='lg:m-2 lg:h-[40px] lg:px-4 py-1 flex justify-center bg-black text-white rounded-[10px] items-center gap-1 cursor-pointer hover:scale-110 duration-400 hover:shadow-2xl ease-in'
+              className="lg:m-2 lg:h-[40px] lg:px-4 py-1 flex justify-center bg-black text-white rounded-[10px] items-center gap-1 cursor-pointer hover:scale-110 duration-400 hover:shadow-2xl ease-in"
             >
               <X size={16} />
               <h4>Clear All</h4>
             </div>
           </div>
 
-          <div className='flex justify-center gap-8 py-3 m-2'>
-            <div 
-              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
+          <div className="flex justify-center gap-8 py-3 m-2">
+            <div
+              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? "bg-black text-white" : ""} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
               onClick={() => setisBuy(true)}
             >
               <div>Buy</div>
             </div>
-            <div 
-              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
+            <div
+              className={`lg:py-1.5 lg:px-12 lg:text-[20px] border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? "bg-black text-white" : ""} flex items-center justify-center cursor-pointer hover:scale-105 duration-500 ease-in-out`}
               onClick={() => setisBuy(false)}
             >
               <div>Rent</div>
@@ -272,9 +319,9 @@ const Search = () => {
         </div>
 
         {/* Property Type */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <Home size={16} />
               <h3>Property Type</h3>
             </div>
@@ -282,22 +329,50 @@ const Search = () => {
               {isPropertyTypeShowm ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isPropertyTypeShowm ? 'grid grid-cols-2 p-2 gap-4' : 'hidden'}`}>
-            <div className={`hover:scale-105 duration-400 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'flat' ? 'bg-black text-white' : ''} cursor-pointer`}
-              onClick={() => setpropertyType(propertyType === 'flat' ? '' : 'flat')}><h2>Flat</h2></div>
-            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'villa' ? 'bg-black text-white' : ''} cursor-pointer`}
-              onClick={() => setpropertyType(propertyType === 'villa' ? '' : 'villa')}><h2>Villa</h2></div>
-            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'plot' ? 'bg-black text-white' : ''} cursor-pointer`}
-              onClick={() => setpropertyType(propertyType === 'plot' ? '' : 'plot')}><h2>Plot</h2></div>
-            <div className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'commercial' ? 'bg-black text-white' : ''} cursor-pointer`}
-              onClick={() => setpropertyType(propertyType === 'commercial' ? '' : 'commercial')}><h2>Commercial</h2></div>
+          <div
+            className={`${isPropertyTypeShowm ? "grid grid-cols-2 p-2 gap-4" : "hidden"}`}
+          >
+            <div
+              className={`hover:scale-105 duration-400 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "flat" ? "bg-black text-white" : ""} cursor-pointer`}
+              onClick={() =>
+                setpropertyType(propertyType === "flat" ? "" : "flat")
+              }
+            >
+              <h2>Flat</h2>
+            </div>
+            <div
+              className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "villa" ? "bg-black text-white" : ""} cursor-pointer`}
+              onClick={() =>
+                setpropertyType(propertyType === "villa" ? "" : "villa")
+              }
+            >
+              <h2>Villa</h2>
+            </div>
+            <div
+              className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "plot" ? "bg-black text-white" : ""} cursor-pointer`}
+              onClick={() =>
+                setpropertyType(propertyType === "plot" ? "" : "plot")
+              }
+            >
+              <h2>Plot</h2>
+            </div>
+            <div
+              className={`hover:scale-105 duration-500 ease-in-out border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "commercial" ? "bg-black text-white" : ""} cursor-pointer`}
+              onClick={() =>
+                setpropertyType(
+                  propertyType === "commercial" ? "" : "commercial",
+                )
+              }
+            >
+              <h2>Commercial</h2>
+            </div>
           </div>
         </div>
 
         {/* Price Range */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <IndianRupee size={16} />
               <h3>Price Range</h3>
             </div>
@@ -305,15 +380,20 @@ const Search = () => {
               {isPriceRangeShown ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isPriceRangeShown ? '' : 'hidden'}`}>
-            <PriceRangeSlider startPriceRange={startPriceRange} endPriceRange={endPriceRange} setendPriceRange={setendPriceRange} setstartPriceRange={setstartPriceRange} />
+          <div className={`${isPriceRangeShown ? "" : "hidden"}`}>
+            <PriceRangeSlider
+              startPriceRange={startPriceRange}
+              endPriceRange={endPriceRange}
+              setendPriceRange={setendPriceRange}
+              setstartPriceRange={setstartPriceRange}
+            />
           </div>
         </div>
 
         {/* Location */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <MapPin size={16} />
               <h3>Location</h3>
             </div>
@@ -321,7 +401,7 @@ const Search = () => {
               {isLocationShown ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isLocationShown ? 'p-2' : 'hidden'}`}>
+          <div className={`${isLocationShown ? "p-2" : "hidden"}`}>
             <LocationSelector
               state={state}
               setstate={setstate}
@@ -336,9 +416,9 @@ const Search = () => {
         </div>
 
         {/* Bedrooms and Bathrooms */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <Grid2x2Plus size={16} />
               <h3>Bedrooms and Bathrooms</h3>
             </div>
@@ -346,7 +426,7 @@ const Search = () => {
               {isbedroomShown ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isbedroomShown ? 'p-2' : 'hidden'}`}>
+          <div className={`${isbedroomShown ? "p-2" : "hidden"}`}>
             <BedroomBathroomSelector
               bedrooms={bedRooms}
               setBedrooms={setbedRooms}
@@ -357,9 +437,9 @@ const Search = () => {
         </div>
 
         {/* Area */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <Ruler size={16} />
               <h3>Set Area</h3>
             </div>
@@ -367,15 +447,20 @@ const Search = () => {
               {isAreaShown ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isAreaShown ? 'p-2' : 'hidden'}`}>
-            <AreaRangeSlider setstartArea={setstartArea} setendArea={setendArea} startArea={startArea} endArea={endArea} />
+          <div className={`${isAreaShown ? "p-2" : "hidden"}`}>
+            <AreaRangeSlider
+              setstartArea={setstartArea}
+              setendArea={setendArea}
+              startArea={startArea}
+              endArea={endArea}
+            />
           </div>
         </div>
 
         {/* Features */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='flex gap-2 items-center justify-between p-3'>
-            <div className='flex gap-2 items-center justify-center'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="flex gap-2 items-center justify-between p-3">
+            <div className="flex gap-2 items-center justify-center">
               <SquarePlus size={16} />
               <h3>Select Features</h3>
             </div>
@@ -383,7 +468,7 @@ const Search = () => {
               {isFeaturesShown ? <ChevronUp /> : <ChevronDown />}
             </div>
           </div>
-          <div className={`${isFeaturesShown ? 'p-2' : 'hidden'}`}>
+          <div className={`${isFeaturesShown ? "p-2" : "hidden"}`}>
             <FeaturesSelector
               furnishingStatus={furnishingStatus}
               setfurnishingStatus={setfurnishingStatus}
@@ -398,8 +483,8 @@ const Search = () => {
         </div>
 
         {/* Toggles */}
-        <div className='bg-white shadow-sm m-2 rounded-[10px] py-4 p-2'>
-          <div className='p-2'>
+        <div className="bg-white shadow-sm m-2 rounded-[10px] py-4 p-2">
+          <div className="p-2">
             <PropertyToggles
               igVerifiedProperty={igVerifiedProperty}
               setigVerifiedProperty={setigVerifiedProperty}
@@ -439,27 +524,27 @@ const Search = () => {
           {/* Filter Sheet */}
           <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-gray-100 rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[90vh] flex flex-col">
             {/* Sheet Header */}
-            <div className='border-b-[1px] border-gray-300 bg-white rounded-t-3xl sticky top-0 z-10'>
-              <div className='flex justify-between items-center p-4 border-b-[1px] border-gray-300'>
-                <h1 className='text-2xl font-bold'>Filters</h1>
-                <button 
+            <div className="border-b-[1px] border-gray-300 bg-white rounded-t-3xl sticky top-0 z-10">
+              <div className="flex justify-between items-center p-4 border-b-[1px] border-gray-300">
+                <h1 className="text-2xl font-bold">Filters</h1>
+                <button
                   onClick={() => setShowMobileFilter(false)}
-                  className='p-2 hover:bg-gray-100 rounded-full transition-colors'
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
 
               {/* Buy/Rent Toggle */}
-              <div className='flex justify-center gap-4 py-3 px-4'>
-                <div 
-                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
+              <div className="flex justify-center gap-4 py-3 px-4">
+                <div
+                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${isBuy ? "bg-black text-white" : ""} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
                   onClick={() => setisBuy(true)}
                 >
                   Buy
                 </div>
-                <div 
-                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? 'bg-black text-white' : ''} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
+                <div
+                  className={`flex-1 py-2 px-6 text-base border-[1px] text-black border-gray-700 rounded-[10px] ${!isBuy ? "bg-black text-white" : ""} flex items-center justify-center cursor-pointer active:scale-95 transition-transform`}
                   onClick={() => setisBuy(false)}
                 >
                   Rent
@@ -468,58 +553,105 @@ const Search = () => {
             </div>
 
             {/* Scrollable Filter Content */}
-            <div className='flex-1 overflow-y-auto p-4'>
+            <div className="flex-1 overflow-y-auto p-4">
               {/* Property Type */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <Home size={16} />
-                    <h3 className='text-sm font-semibold'>Property Type</h3>
+                    <h3 className="text-sm font-semibold">Property Type</h3>
                   </div>
-                  <div onClick={() => setisPropertyTypeShowm(!isPropertyTypeShowm)}>
-                    {isPropertyTypeShowm ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  <div
+                    onClick={() => setisPropertyTypeShowm(!isPropertyTypeShowm)}
+                  >
+                    {isPropertyTypeShowm ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isPropertyTypeShowm ? 'grid grid-cols-2 gap-3 mt-3' : 'hidden'}`}>
-                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'flat' ? 'bg-black text-white' : ''} cursor-pointer`}
-                    onClick={() => setpropertyType(propertyType === 'flat' ? '' : 'flat')}>Flat</div>
-                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'villa' ? 'bg-black text-white' : ''} cursor-pointer`}
-                    onClick={() => setpropertyType(propertyType === 'villa' ? '' : 'villa')}>Villa</div>
-                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'plot' ? 'bg-black text-white' : ''} cursor-pointer`}
-                    onClick={() => setpropertyType(propertyType === 'plot' ? '' : 'plot')}>Plot</div>
-                  <div className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === 'commercial' ? 'bg-black text-white' : ''} cursor-pointer`}
-                    onClick={() => setpropertyType(propertyType === 'commercial' ? '' : 'commercial')}>Commercial</div>
+                <div
+                  className={`${isPropertyTypeShowm ? "grid grid-cols-2 gap-3 mt-3" : "hidden"}`}
+                >
+                  <div
+                    className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "flat" ? "bg-black text-white" : ""} cursor-pointer`}
+                    onClick={() =>
+                      setpropertyType(propertyType === "flat" ? "" : "flat")
+                    }
+                  >
+                    Flat
+                  </div>
+                  <div
+                    className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "villa" ? "bg-black text-white" : ""} cursor-pointer`}
+                    onClick={() =>
+                      setpropertyType(propertyType === "villa" ? "" : "villa")
+                    }
+                  >
+                    Villa
+                  </div>
+                  <div
+                    className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "plot" ? "bg-black text-white" : ""} cursor-pointer`}
+                    onClick={() =>
+                      setpropertyType(propertyType === "plot" ? "" : "plot")
+                    }
+                  >
+                    Plot
+                  </div>
+                  <div
+                    className={`active:scale-95 transition-transform border-[1px] text-black flex items-center justify-center p-2 border-gray-700 rounded-[10px] ${propertyType === "commercial" ? "bg-black text-white" : ""} cursor-pointer`}
+                    onClick={() =>
+                      setpropertyType(
+                        propertyType === "commercial" ? "" : "commercial",
+                      )
+                    }
+                  >
+                    Commercial
+                  </div>
                 </div>
               </div>
 
               {/* Price Range */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <IndianRupee size={16} />
-                    <h3 className='text-sm font-semibold'>Price Range</h3>
+                    <h3 className="text-sm font-semibold">Price Range</h3>
                   </div>
                   <div onClick={() => setisPriceRangeShown(!isPriceRangeShown)}>
-                    {isPriceRangeShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isPriceRangeShown ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isPriceRangeShown ? 'mt-2' : 'hidden'}`}>
-                  <PriceRangeSlider startPriceRange={startPriceRange} endPriceRange={endPriceRange} setendPriceRange={setendPriceRange} setstartPriceRange={setstartPriceRange} />
+                <div className={`${isPriceRangeShown ? "mt-2" : "hidden"}`}>
+                  <PriceRangeSlider
+                    startPriceRange={startPriceRange}
+                    endPriceRange={endPriceRange}
+                    setendPriceRange={setendPriceRange}
+                    setstartPriceRange={setstartPriceRange}
+                  />
                 </div>
               </div>
 
               {/* Location */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <MapPin size={16} />
-                    <h3 className='text-sm font-semibold'>Location</h3>
+                    <h3 className="text-sm font-semibold">Location</h3>
                   </div>
                   <div onClick={() => setisLocationShown(!isLocationShown)}>
-                    {isLocationShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isLocationShown ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isLocationShown ? 'mt-2' : 'hidden'}`}>
+                <div className={`${isLocationShown ? "mt-2" : "hidden"}`}>
                   <LocationSelector
                     state={state}
                     setstate={setstate}
@@ -534,17 +666,23 @@ const Search = () => {
               </div>
 
               {/* Bedrooms and Bathrooms */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <Grid2x2Plus size={16} />
-                    <h3 className='text-sm font-semibold'>Bedrooms & Bathrooms</h3>
+                    <h3 className="text-sm font-semibold">
+                      Bedrooms & Bathrooms
+                    </h3>
                   </div>
                   <div onClick={() => setisbedroomShown(!isbedroomShown)}>
-                    {isbedroomShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isbedroomShown ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isbedroomShown ? 'mt-2' : 'hidden'}`}>
+                <div className={`${isbedroomShown ? "mt-2" : "hidden"}`}>
                   <BedroomBathroomSelector
                     bedrooms={bedRooms}
                     setBedrooms={setbedRooms}
@@ -555,33 +693,46 @@ const Search = () => {
               </div>
 
               {/* Area */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <Ruler size={16} />
-                    <h3 className='text-sm font-semibold'>Area</h3>
+                    <h3 className="text-sm font-semibold">Area</h3>
                   </div>
                   <div onClick={() => setisAreaShown(!isAreaShown)}>
-                    {isAreaShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isAreaShown ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isAreaShown ? 'mt-2' : 'hidden'}`}>
-                  <AreaRangeSlider setstartArea={setstartArea} setendArea={setendArea} startArea={startArea} endArea={endArea} />
+                <div className={`${isAreaShown ? "mt-2" : "hidden"}`}>
+                  <AreaRangeSlider
+                    setstartArea={setstartArea}
+                    setendArea={setendArea}
+                    startArea={startArea}
+                    endArea={endArea}
+                  />
                 </div>
               </div>
 
               {/* Features */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
-                <div className='flex gap-2 items-center justify-between mb-2'>
-                  <div className='flex gap-2 items-center'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
+                <div className="flex gap-2 items-center justify-between mb-2">
+                  <div className="flex gap-2 items-center">
                     <SquarePlus size={16} />
-                    <h3 className='text-sm font-semibold'>Features</h3>
+                    <h3 className="text-sm font-semibold">Features</h3>
                   </div>
                   <div onClick={() => setisFeaturesShown(!isFeaturesShown)}>
-                    {isFeaturesShown ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                    {isFeaturesShown ? (
+                      <ChevronUp size={20} />
+                    ) : (
+                      <ChevronDown size={20} />
+                    )}
                   </div>
                 </div>
-                <div className={`${isFeaturesShown ? 'mt-2' : 'hidden'}`}>
+                <div className={`${isFeaturesShown ? "mt-2" : "hidden"}`}>
                   <FeaturesSelector
                     furnishingStatus={furnishingStatus}
                     setfurnishingStatus={setfurnishingStatus}
@@ -596,7 +747,7 @@ const Search = () => {
               </div>
 
               {/* Toggles */}
-              <div className='bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3'>
+              <div className="bg-white shadow-sm mb-3 rounded-[10px] py-3 px-3">
                 <PropertyToggles
                   igVerifiedProperty={igVerifiedProperty}
                   setigVerifiedProperty={setigVerifiedProperty}
@@ -611,18 +762,18 @@ const Search = () => {
             </div>
 
             {/* Sheet Footer - Sticky */}
-            <div className='border-t border-gray-300 bg-white p-4 flex gap-3'>
+            <div className="border-t border-gray-300 bg-white p-4 flex gap-3">
               {getActiveFilterCount() > 0 && (
                 <button
                   onClick={clearAllFilters}
-                  className='flex-1 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold active:scale-95 transition-transform'
+                  className="flex-1 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold active:scale-95 transition-transform"
                 >
                   Clear All
                 </button>
               )}
               <button
                 onClick={() => setShowMobileFilter(false)}
-                className='flex-1 py-3 bg-black text-white rounded-xl font-semibold active:scale-95 transition-transform flex items-center justify-center gap-2'
+                className="flex-1 py-3 bg-black text-white rounded-xl font-semibold active:scale-95 transition-transform flex items-center justify-center gap-2"
               >
                 <SearchIcon size={20} />
                 Show {filteredProperties.length} Results
@@ -638,21 +789,26 @@ const Search = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
-                {isBuy ? 'Properties for Sale' : 'Properties for Rent'}
+                {isBuy ? "Properties for Sale" : "Properties for Rent"}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {isLoading ? 'Searching...' : 
-                 hasActiveFilters() ? 
-                   `${filteredProperties.length} properties found` :
-                   `Showing ${filteredProperties.length} properties in Jaipur`
-                }
+                {isLoading
+                  ? "Searching..."
+                  : hasActiveFilters()
+                    ? `${filteredProperties.length} properties found`
+                    : `Showing ${filteredProperties.length} properties in Jaipur`}
               </p>
             </div>
             <div className="hidden lg:flex items-center gap-2">
               {getActiveFilterCount() > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-lg">
-                  <span className="text-sm font-semibold">{getActiveFilterCount()} filters active</span>
-                  <button onClick={clearAllFilters} className="text-blue-600 hover:text-blue-800">
+                  <span className="text-sm font-semibold">
+                    {getActiveFilterCount()} filters active
+                  </span>
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -664,7 +820,9 @@ const Search = () => {
           {!hasActiveFilters() && !isLoading && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <span className="font-semibold">📍 Jaipur Properties:</span> Showing all available properties in Jaipur. Apply filters to refine your search.
+                <span className="font-semibold">📍 Jaipur Properties:</span>{" "}
+                Showing all available properties in Jaipur. Apply filters to
+                refine your search.
               </p>
             </div>
           )}
@@ -675,11 +833,11 @@ const Search = () => {
         ) : filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredProperties.map((property, index) => (
-              <PropertyCard 
-                key={property.id || index} 
+              <PropertyCard
+                key={property.id || index}
                 property={property}
                 onCardClick={(prop) => {
-                  console.log('Property clicked:', prop)
+                  console.log("Property clicked:", prop);
                 }}
               />
             ))}
@@ -689,8 +847,12 @@ const Search = () => {
             <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
               <SearchIcon size={48} className="text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No properties found</h3>
-            <p className="text-gray-600 mb-4">Try adjusting your filters to see more results</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              No properties found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Try adjusting your filters to see more results
+            </p>
             <button
               onClick={clearAllFilters}
               className="px-6 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
@@ -701,7 +863,7 @@ const Search = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Search
+export default Search;

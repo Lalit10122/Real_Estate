@@ -1,31 +1,73 @@
-import React from 'react'
-import { ArrowRight, TrendingUp, Award, Shield, Users } from 'lucide-react'
+import React, { useEffect, useState } from "react";
+import { ArrowRight, TrendingUp, Award, Shield, Users } from "lucide-react";
+import axios from "axios";
 
-import StatsSection from '../components/StatusSection'
-import propertyData from '../assets/Data/Property'
-import PropertySlider from '../components/PropertySlider'
-import { useNavigate } from 'react-router-dom'
-import HomeFilter from '../components/HomeFIlter'
+import StatsSection from "../components/StatusSection";
+import propertyData from "../assets/Data/Property";
+import PropertySlider from "../components/PropertySlider";
+import { useNavigate } from "react-router-dom";
+import HomeFilter from "../components/HomeFIlter";
+
+const API_URL = "http://localhost:8081/api";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [featuredProperties, setFeaturedProperties] = useState([]);
+  const [loadingFeatured, setLoadingFeatured] = useState(true);
+  const [featuredError, setFeaturedError] = useState("");
+
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        setFeaturedError("");
+
+        const response = await axios.get(`${API_URL}/properties`, {
+          params: {
+            status: "active",
+            page: 1,
+            limit: 8,
+            sortBy: "createdAt",
+            sortOrder: "desc",
+          },
+        });
+
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          const normalized = response.data.data.map((prop) => ({
+            ...prop,
+            id: prop._id || prop.id,
+          }));
+          setFeaturedProperties(normalized);
+        } else {
+          setFeaturedError("Failed to load properties");
+        }
+      } catch (error) {
+        console.error("Error fetching properties for home page:", error);
+        setFeaturedError("Failed to load properties");
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+
+    fetchFeatured();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className='relative overflow-hidden bg-white'>
+      <div className="relative overflow-hidden bg-white">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12'>
-          <div className='flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch'>
-            
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
             {/* Left side - Content & Filter */}
-            <div className='w-full lg:w-1/2 flex flex-col justify-between space-y-6'>
+            <div className="w-full lg:w-1/2 flex flex-col justify-between space-y-6">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-black/5 rounded-full w-fit">
                 <TrendingUp size={16} className="text-black" />
-                <span className="text-sm font-semibold text-gray-700">India's #1 Property Platform</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  India's #1 Property Platform
+                </span>
               </div>
 
               {/* Heading */}
@@ -37,7 +79,8 @@ const Home = () => {
                   </span>
                 </h1>
                 <p className="mt-4 text-base lg:text-lg text-gray-600 leading-relaxed">
-                  Discover 1000+ verified properties across India. Your perfect home is just a search away.
+                  Discover 1000+ verified properties across India. Your perfect
+                  home is just a search away.
                 </p>
               </div>
 
@@ -84,19 +127,25 @@ const Home = () => {
                     alt="Modern Luxury Villa"
                     className="w-full h-full object-cover"
                   />
-                  
+
                   {/* Gradient Overlays */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                   <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent"></div>
-                  
+
                   {/* Image Content Overlay */}
                   <div className="absolute bottom-8 left-8 right-8 text-white z-10">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 backdrop-blur-md rounded-lg mb-3">
                       <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-semibold">Available Now</span>
+                      <span className="text-sm font-semibold">
+                        Available Now
+                      </span>
                     </div>
-                    <h3 className="text-3xl font-bold mb-2 drop-shadow-lg">Luxury Villa in Prime Location</h3>
-                    <p className="text-white/90 text-lg mb-4">Starting from ₹2.5 Cr</p>
+                    <h3 className="text-3xl font-bold mb-2 drop-shadow-lg">
+                      Luxury Villa in Prime Location
+                    </h3>
+                    <p className="text-white/90 text-lg mb-4">
+                      Starting from ₹2.5 Cr
+                    </p>
                     <div className="flex items-center gap-6">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center">
@@ -127,8 +176,12 @@ const Home = () => {
                       <TrendingUp className="text-white" size={28} />
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-gray-900">99%</div>
-                      <div className="text-sm text-gray-600 whitespace-nowrap">Success Rate</div>
+                      <div className="text-3xl font-bold text-gray-900">
+                        99%
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-nowrap">
+                        Success Rate
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -140,8 +193,12 @@ const Home = () => {
                       <Award className="text-white" size={28} />
                     </div>
                     <div>
-                      <div className="text-3xl font-bold text-gray-900">1000+</div>
-                      <div className="text-sm text-gray-600 whitespace-nowrap">Properties</div>
+                      <div className="text-3xl font-bold text-gray-900">
+                        1000+
+                      </div>
+                      <div className="text-sm text-gray-600 whitespace-nowrap">
+                        Properties
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -203,8 +260,8 @@ const Home = () => {
                 Handpicked properties just for you
               </p>
             </div>
-            <button 
-              onClick={() => navigate('/search')}
+            <button
+              onClick={() => navigate("/search")}
               className="hidden sm:flex items-center gap-2 px-6 py-3 bg-black text-white rounded-xl font-semibold hover:bg-gray-800 transition-colors"
             >
               View All
@@ -213,11 +270,30 @@ const Home = () => {
           </div>
 
           {/* Property Slider */}
-          <PropertySlider propertyData={propertyData?.slice(0, 8) || []} />
+          {loadingFeatured ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
+            </div>
+          ) : (
+            <>
+              {featuredError && (
+                <p className="text-center text-sm text-red-500 mb-4">
+                  {featuredError}
+                </p>
+              )}
+              <PropertySlider
+                propertyData={
+                  featuredProperties.length > 0
+                    ? featuredProperties
+                    : propertyData?.slice(0, 8) || []
+                }
+              />
+            </>
+          )}
 
           {/* Mobile View All Button */}
-          <button 
-            onClick={() => navigate('/search')}
+          <button
+            onClick={() => navigate("/search")}
             className="sm:hidden w-full mt-6 flex items-center justify-center gap-2 px-6 py-4 bg-black text-white rounded-xl font-semibold active:scale-95 transition-transform"
           >
             View All Properties
@@ -239,7 +315,8 @@ const Home = () => {
               Why Choose Us?
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              We provide the best real estate experience with verified properties and trusted services
+              We provide the best real estate experience with verified
+              properties and trusted services
             </p>
           </div>
 
@@ -249,9 +326,12 @@ const Home = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl flex items-center justify-center mb-6">
                 <Shield className="text-white" size={32} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">100% Verified</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                100% Verified
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Every property is thoroughly verified by our expert team to ensure authenticity and quality.
+                Every property is thoroughly verified by our expert team to
+                ensure authenticity and quality.
               </p>
             </div>
 
@@ -260,9 +340,12 @@ const Home = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center mb-6">
                 <Award className="text-white" size={32} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Award Winning</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Award Winning
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Recognized as India's best property platform with multiple industry awards and accolades.
+                Recognized as India's best property platform with multiple
+                industry awards and accolades.
               </p>
             </div>
 
@@ -271,9 +354,12 @@ const Home = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl flex items-center justify-center mb-6">
                 <Users className="text-white" size={32} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Trusted by Thousands</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Trusted by Thousands
+              </h3>
               <p className="text-gray-600 leading-relaxed">
-                Join 50,000+ happy customers who found their dream homes through our platform.
+                Join 50,000+ happy customers who found their dream homes through
+                our platform.
               </p>
             </div>
           </div>
@@ -297,10 +383,11 @@ const Home = () => {
                 Ready to Find Your Dream Home?
               </h2>
               <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
-                Start your property search today and discover thousands of verified listings
+                Start your property search today and discover thousands of
+                verified listings
               </p>
-              <button 
-                onClick={() => navigate('/search')}
+              <button
+                onClick={() => navigate("/search")}
                 className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-transform shadow-xl"
               >
                 Start Exploring
@@ -354,10 +441,10 @@ const Home = () => {
         }
       `}</style>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
 
 // import React, { useState } from 'react'
 // import image from '../assets/Images/Gemini_Generated_Image_chqsg7chqsg7chqs.png'
@@ -373,7 +460,7 @@ export default Home
 //     <div className="min-h-screen">
 //       {/* Hero Section */}
 //       <div className='flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 py-6 lg:py-10 gap-6 lg:gap-8 min-h-screen lg:h-screen'>
- 
+
 //         {/* Left side - Filter search section */}
 //         <div className='w-full lg:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex flex-col p-4 sm:p-6 lg:p-8 lg:max-h-[600] shadow-sm'>
 //           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-neutral-900">
@@ -421,7 +508,7 @@ export default Home
 
 //       {/* Properties Section Placeholder */}
 //       <PropertySlider propertyData={propertyData}/>
-      
+
 //     </div>
 //   )
 // }
@@ -442,7 +529,7 @@ export default Home
 //     <div className="min-h-screen">
 //       {/* Hero Section */}
 //       <div className='flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 py-6 lg:py-10 gap-6 lg:gap-8 lg:min-h-screen lg:h-screen'>
- 
+
 //         {/* Left side - Filter search section */}
 //         <div className='w-full lg:w-1/2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl flex flex-col p-4 sm:p-6 lg:p-8 lg:max-h-[600px] shadow-sm'>
 //           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-neutral-900">
@@ -495,7 +582,7 @@ export default Home
 //       <div className="hidden lg:block px-4 sm:px-6 lg:px-8 py-12">
 //         <PropertySlider propertyData={propertyData}/>
 //       </div>
-      
+
 //     </div>
 //   )
 // }

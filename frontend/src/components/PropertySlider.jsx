@@ -1,8 +1,11 @@
 import PropertyCard from "./PropertyCard";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 export default function PropertySlider({ propertyData }) {
+  const navigate = useNavigate();
+
   const scrollRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -14,7 +17,7 @@ export default function PropertySlider({ propertyData }) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
       setCanScrollLeft(scrollLeft > 0);
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-      
+
       // Calculate current index based on scroll position
       const cardWidth = scrollRef.current.firstChild?.offsetWidth || 0;
       const gap = 16; // 4 * 4px (gap-4)
@@ -50,7 +53,7 @@ export default function PropertySlider({ propertyData }) {
       const cardWidth = scrollRef.current.firstChild?.offsetWidth || 0;
       const gap = 16;
       const scrollAmount = cardWidth + gap;
-      
+
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -74,7 +77,7 @@ export default function PropertySlider({ propertyData }) {
               <ChevronLeft size={20} className="text-neutral-800" />
             </button>
           )}
-          
+
           {canScrollRight && (
             <button
               onClick={() => scroll("right")}
@@ -144,7 +147,7 @@ export default function PropertySlider({ propertyData }) {
               {propertyData.length} properties available
             </p>
           </div>
-          
+
           {/* View All Link */}
           <button className="text-sm font-semibold text-black hover:underline flex items-center gap-1">
             View All
@@ -162,7 +165,10 @@ export default function PropertySlider({ propertyData }) {
         {/* Load More Button (Optional) */}
         {propertyData.length >= 8 && (
           <div className="flex justify-center mt-8">
-            <button className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => navigate("/search")}
+              className="px-8 py-3 bg-black text-white rounded-xl font-semibold hover:bg-neutral-800 transition-colors flex items-center gap-2"
+            >
               Load More Properties
               <ChevronRight size={18} />
             </button>

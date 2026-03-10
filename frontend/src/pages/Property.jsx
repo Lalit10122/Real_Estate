@@ -27,8 +27,10 @@ import {
   Compass,
   Home as HomeIcon
 } from 'lucide-react'
-import propertyData from '../assets/Data/Property'
+import axios from 'axios'
 import MapComponent from '../components/MapComponent'
+
+const API_URL = 'http://localhost:8081/api'
 
 const Property = () => {
   const { propertyid } = useParams()
@@ -37,12 +39,47 @@ const Property = () => {
   const [isSaved, setIsSaved] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showContactModal, setShowContactModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const foundProperty = propertyData.find(p => p.id === parseInt(propertyid))
-    setProperty(foundProperty)
-    window.scrollTo(0, 0)
+    const fetchProperty = async () => {
+      try {
+        setLoading(true)
+        setError('')
+
+        const response = await axios.get(`${API_URL}/properties/${propertyid}`)
+
+        if (response.data?.success && response.data.data) {
+          const p = response.data.data
+          setProperty({ ...p, id: p._id || p.id })
+        } else {
+          setError('Property not found')
+        }
+      } catch (err) {
+        console.error('Failed to fetch property:', err)
+        setError('Property not found')
+      } finally {
+        setLoading(false)
+        window.scrollTo(0, 0)
+      }
+    }
+
+    if (propertyid) {
+      fetchProperty()
+    }
   }, [propertyid])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+          <p className="text-gray-600 text-sm">Loading property details...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!property) {
     return (
@@ -50,7 +87,9 @@ const Property = () => {
         <div className="text-center p-8">
           <AlertCircle className="w-20 h-20 text-gray-400 mx-auto mb-4" />
           <h2 className="text-3xl font-bold text-gray-900 mb-3">Property Not Found</h2>
-          <p className="text-gray-600 mb-6 text-lg">The property you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-6 text-lg">
+            {error || "The property you're looking for doesn't exist or may have been removed."}
+          </p>
           <button
             onClick={() => navigate('/search')}
             className="px-8 py-4 bg-black text-white rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
@@ -64,6 +103,7 @@ const Property = () => {
   }
 
   const formatPrice = (amount) => {
+    if (!amount || Number.isNaN(Number(amount))) return '₹N/A'
     if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`
     if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`
     return `₹${(amount / 1000).toFixed(0)} K`
@@ -252,7 +292,7 @@ const Property = () => {
                   </p>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl sm:text-4xl font-bold text-gray-900">
-                      {formatPrice(property.listingType === 'rent' ? property.rental?.monthlyRent : property.price.amount)}
+                      {formatPrice(property.price?.amount)}
                     </span>
                     {property.price.negotiable && (
                       <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-lg">

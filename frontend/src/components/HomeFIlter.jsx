@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 
 const HomeFilter = () => {
   const navigate = useNavigate();
-  const [propertyType, setPropertyType] = useState("buy"); // Set default to 'buy'
   const [isBuy, setisBuy] = useState(true);
   const [location, setLocation] = useState("");
   const [priceRange, setPriceRange] = useState("");
@@ -33,17 +32,21 @@ const HomeFilter = () => {
 
   const categories = ["Flat", "Villa", "Plot", "Commercial"];
 
-  // const handleSearch = () => {
-  //   // Navigate to search page with filters
-  //   const params = new URLSearchParams();
+  const handleSearch = () => {
+    // Create a state object to pass to Search page
+    const searchState = {
+      isBuy: isBuy,
+      city: location,
+      propertyType: propertyCategory,
+      priceRange: priceRange,
+    };
 
-  //   if (propertyType) params.append('type', propertyType);
-  //   if (location) params.append('location', location);
-  //   if (priceRange) params.append('price', priceRange);
-  //   if (propertyCategory) params.append('category', propertyCategory);
-
-  //   navigate(`/search?${params.toString()}`);
-  // };
+    // Navigate to search page with state
+    navigate("/search", {
+      state: searchState,
+      replace: false,
+    });
+  };
 
   return (
     <div className="w-full">
@@ -51,7 +54,7 @@ const HomeFilter = () => {
       <div className="flex gap-3 mb-6">
         <button
           onClick={() => setisBuy(true)}
-          className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-base transition-all duration-200 ${
+          className={`flex-1 py-3.5 px-6 relative z-10 cursor-pointer rounded-xl font-bold text-base transition-all duration-200 ${
             isBuy
               ? "bg-black text-white shadow-lg scale-[1.02]"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
@@ -61,7 +64,7 @@ const HomeFilter = () => {
         </button>
         <button
           onClick={() => setisBuy(false)}
-          className={`flex-1 py-3.5 px-6 rounded-xl font-bold text-base transition-all duration-200 ${
+          className={`flex-1 py-3.5 px-6 relative z-10 cursor-pointer rounded-xl font-bold text-base transition-all duration-200 ${
             !isBuy
               ? "bg-black text-white shadow-lg scale-[1.02]"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
@@ -147,8 +150,8 @@ const HomeFilter = () => {
 
         {/* Search Button */}
         <button
-          // onClick={handleSearch}
-          className="w-full bg-gradient-to-r from-black to-gray-800 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 mt-4"
+          onClick={handleSearch}
+          className="w-full bg-gradient-to-r from-black to-gray-800 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-[1.02] active:scale-95 transition-all duration-200 flex items-center justify-center gap-3 mt-4 relative z-10 cursor-pointer"
         >
           <Search size={24} />
           Search Properties
