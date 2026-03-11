@@ -106,6 +106,14 @@ export const createProperty = async (req, res) => {
 
     // Handle image upload if files are present
     if (req.files && req.files.length > 0) {
+      const primaryIndexRaw = req.body.primaryImageIndex;
+      const primaryIndex = Number.isNaN(Number(primaryIndexRaw))
+        ? 0
+        : Math.min(
+            Math.max(Number(primaryIndexRaw) || 0, 0),
+            req.files.length - 1,
+          );
+
       console.log("Uploading images to Cloudinary...");
       const uploadPromises = req.files.map(async (file, index) => {
         try {
@@ -119,7 +127,7 @@ export const createProperty = async (req, res) => {
           return {
             url: result.url,
             publicId: result.publicId,
-            isPrimary: index === 0,
+            isPrimary: index === primaryIndex,
             caption: req.body[`caption_${index}`] || file.originalname,
           };
         } catch (uploadError) {
@@ -171,6 +179,34 @@ export const createProperty = async (req, res) => {
     // Handle amenities array (FormData sends as amenities[0], amenities[1], etc.)
     if (parsedBody.amenities && typeof parsedBody.amenities === 'object' && !Array.isArray(parsedBody.amenities)) {
       parsedBody.amenities = Object.values(parsedBody.amenities).filter(Boolean);
+    }
+
+    // Normalize nearby location arrays (schools, hospitals, malls, etc.)
+    if (parsedBody.location?.nearby) {
+      const nearby = parsedBody.location.nearby;
+      Object.keys(nearby).forEach((key) => {
+        if (nearby[key] && typeof nearby[key] === "object" && !Array.isArray(nearby[key])) {
+          nearby[key] = Object.values(nearby[key]).filter(Boolean);
+        }
+      });
+    }
+
+    // Convert coordinates to numbers if provided
+    if (
+      parsedBody.location?.coordinates?.lat !== undefined &&
+      parsedBody.location.coordinates.lat !== ""
+    ) {
+      parsedBody.location.coordinates.lat = Number(
+        parsedBody.location.coordinates.lat,
+      );
+    }
+    if (
+      parsedBody.location?.coordinates?.lng !== undefined &&
+      parsedBody.location.coordinates.lng !== ""
+    ) {
+      parsedBody.location.coordinates.lng = Number(
+        parsedBody.location.coordinates.lng,
+      );
     }
     
     // Ensure owner object exists with required fields

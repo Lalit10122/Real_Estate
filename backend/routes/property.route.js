@@ -59,12 +59,12 @@ router.get("/", getAllProperties); // Get all properties with filters
 router.get("/user/me", protect, getPropertiesByUser);
 router.get("/user/profile", protect, getUserProfile);
 
-// Create property - Only sellers can create (with file upload support)
-router.post("/", protect, checkSeller, upload.array('images', 20), createProperty);
+// Create property - Only sellers can create (with file upload support, max 10 images)
+router.post("/", protect, checkSeller, upload.array('images', 10), createProperty);
 
 // Parameterized routes (must come after specific routes)
 router.get("/:id", getPropertyById); // Get single property
-router.put("/:id", protect, checkPropertyOwnership, upload.array('images', 20), updateProperty); // Update property
+router.put("/:id", protect, checkPropertyOwnership, upload.array('images', 10), updateProperty); // Update property
 router.delete("/:id", protect, checkPropertyOwnership, deleteProperty); // Delete property
 router.patch("/:id/status", protect, checkPropertyOwnership, updatePropertyStatus); // Update property status
 

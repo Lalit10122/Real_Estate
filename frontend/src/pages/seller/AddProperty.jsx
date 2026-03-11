@@ -50,6 +50,7 @@ const AddProperty = () => {
     verifySellerStatus();
   }, [isAuthenticated, navigate, getAuthHeader]);
   const [images, setImages] = useState([]);
+  const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
   const [formData, setFormData] = useState({
     description: "",
     propertyType: "flat",
@@ -67,6 +68,12 @@ const AddProperty = () => {
     city: "",
     state: "",
     pincode: "",
+    latitude: "",
+    longitude: "",
+    nearbySchools: "",
+    nearbyHospitals: "",
+    nearbyMalls: "",
+    nearbyMetro: "",
     furnished: "unfurnished",
     facing: "north",
     floorNumber: "",
@@ -74,6 +81,12 @@ const AddProperty = () => {
     parking: { covered: 0, open: 0 },
     balconies: 0,
     amenities: [],
+    propertyAge: "",
+    possessionStatus: "",
+    availableFrom: "",
+    immediatelyAvailable: false,
+    isFeatured: false,
+    isVerified: false,
   });
 
   const handleChange = (e) => {
@@ -85,12 +98,40 @@ const AddProperty = () => {
   };
 
   const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImages(files);
+    const files = Array.from(e.target.files || []);
+
+    if (files.length === 0) return;
+
+    const combined = [...images, ...files];
+    if (combined.length > 10) {
+      alert("You can upload a maximum of 10 images. Extra images will be ignored.");
+    }
+
+    const nextImages = combined.slice(0, 10);
+    setImages(nextImages);
+
+    // If there was no image before, set the first as primary
+    if (nextImages.length === files.length && nextImages.length > 0) {
+      setPrimaryImageIndex(0);
+    } else if (primaryImageIndex >= nextImages.length) {
+      setPrimaryImageIndex(0);
+    }
   };
 
   const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
+    const updated = images.filter((_, i) => i !== index);
+    setImages(updated);
+
+    if (updated.length === 0) {
+      setPrimaryImageIndex(0);
+      return;
+    }
+
+    if (index === primaryImageIndex) {
+      setPrimaryImageIndex(0);
+    } else if (index < primaryImageIndex) {
+      setPrimaryImageIndex((prev) => Math.max(prev - 1, 0));
+    }
   };
 
   const handleAmenityChange = (amenity) => {
@@ -137,6 +178,32 @@ const AddProperty = () => {
       data.append("location[city]", formData.city);
       data.append("location[state]", formData.state);
       data.append("location[pincode]", formData.pincode);
+      if (formData.latitude) {
+        data.append("location[coordinates][lat]", formData.latitude);
+      }
+      if (formData.longitude) {
+        data.append("location[coordinates][lng]", formData.longitude);
+      }
+
+      if (formData.nearbySchools) {
+        formData.nearbySchools.split(",").map((s) => s.trim()).filter(Boolean).forEach((school, index) => {
+          data.append(`location[nearby][schools][${index}]`, school);
+        });
+      }
+      if (formData.nearbyHospitals) {
+        formData.nearbyHospitals.split(",").map((s) => s.trim()).filter(Boolean).forEach((hospital, index) => {
+          data.append(`location[nearby][hospitals][${index}]`, hospital);
+        });
+      }
+      if (formData.nearbyMalls) {
+        formData.nearbyMalls.split(",").map((s) => s.trim()).filter(Boolean).forEach((mall, index) => {
+          data.append(`location[nearby][malls][${index}]`, mall);
+        });
+      }
+      if (formData.nearbyMetro) {
+        data.append("location[nearby][metro]", formData.nearbyMetro);
+      }
+
       data.append("features[furnished]", formData.furnished);
       data.append("features[facing]", formData.facing);
       data.append("features[floorNumber]", formData.floorNumber);
@@ -144,6 +211,23 @@ const AddProperty = () => {
       data.append("features[parking][covered]", formData.parking.covered);
       data.append("features[parking][open]", formData.parking.open);
       data.append("features[balconies]", formData.balconies);
+      if (formData.propertyAge) {
+        data.append("features[age]", formData.propertyAge);
+      }
+      if (formData.possessionStatus) {
+        data.append("features[possession]", formData.possessionStatus);
+      }
+
+      if (formData.availableFrom) {
+        data.append("availability[availableFrom]", formData.availableFrom);
+      }
+      data.append(
+        "availability[immediatelyAvailable]",
+        formData.immediatelyAvailable,
+      );
+
+      data.append("isFeatured", formData.isFeatured);
+      data.append("isVerified", formData.isVerified);
 
       // Append amenities
       formData.amenities.forEach((amenity, index) => {
@@ -154,6 +238,8 @@ const AddProperty = () => {
       images.forEach((image) => {
         data.append("images", image);
       });
+      // Primary image index for backend
+      data.append("primaryImageIndex", primaryImageIndex);
 
       const response = await axios.post(
         "http://localhost:8081/api/properties",
@@ -460,6 +546,95 @@ const AddProperty = () => {
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Latitude (for map)
+                </label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  name="latitude"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="26.9124"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Longitude (for map)
+                </label>
+                <input
+                  type="number"
+                  step="0.0001"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="75.7873"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nearby Schools (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="nearbySchools"
+                  value={formData.nearbySchools}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="DPS School - 1km, Ryan International - 2km"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nearby Hospitals (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="nearbyHospitals"
+                  value={formData.nearbyHospitals}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Fortis - 3km"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nearby Malls (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="nearbyMalls"
+                  value={formData.nearbyMalls}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Phoenix Mall - 500m"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nearest Metro
+                </label>
+                <input
+                  type="text"
+                  name="nearbyMetro"
+                  value={formData.nearbyMetro}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Mansarovar Metro - 2.5km"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -540,6 +715,99 @@ const AddProperty = () => {
                 placeholder="2"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Property Age
+              </label>
+              <select
+                name="propertyAge"
+                value={formData.propertyAge}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              >
+                <option value="">Select age</option>
+                <option value="0-1">0-1 year</option>
+                <option value="1-2">1-2 years</option>
+                <option value="2-5">2-5 years</option>
+                <option value="5-10">5-10 years</option>
+                <option value="10+">10+ years</option>
+                <option value="under-construction">Under Construction</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Possession Status
+              </label>
+              <select
+                name="possessionStatus"
+                value={formData.possessionStatus}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              >
+                <option value="">Select status</option>
+                <option value="ready-to-move">Ready to Move</option>
+                <option value="under-construction">Under Construction</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Availability & Visibility */}
+        <div className="bg-white p-6 rounded-lg shadow border">
+          <h2 className="text-xl font-semibold mb-4">Availability & Visibility</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Available From
+              </label>
+              <input
+                type="date"
+                name="availableFrom"
+                value={formData.availableFrom}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 mt-6">
+              <input
+                type="checkbox"
+                name="immediatelyAvailable"
+                checked={formData.immediatelyAvailable}
+                onChange={handleChange}
+                className="w-4 h-4"
+              />
+              <span className="text-sm font-medium">
+                Immediately Available
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isFeatured"
+                checked={formData.isFeatured}
+                onChange={handleChange}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">Show as Featured on Home/Search</span>
+            </label>
+
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                name="isVerified"
+                checked={formData.isVerified}
+                onChange={handleChange}
+                className="w-4 h-4"
+              />
+              <span className="text-sm">Mark as Verified</span>
+            </label>
           </div>
         </div>
 
@@ -581,7 +849,7 @@ const AddProperty = () => {
               />
             </label>
             <p className="text-sm text-gray-500 mt-2">
-              PNG, JPG, GIF up to 5MB (Max 20 images)
+              PNG, JPG, GIF up to 5MB (Max 10 images)
             </p>
           </div>
 
@@ -602,11 +870,18 @@ const AddProperty = () => {
                   >
                     <X size={16} />
                   </button>
-                  {index === 0 && (
-                    <span className="absolute bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded">
-                      Primary
+                  <label className="absolute bottom-2 left-2 bg-white/80 text-xs px-2 py-1 rounded flex items-center gap-1 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="primaryImage"
+                      checked={primaryImageIndex === index}
+                      onChange={() => setPrimaryImageIndex(index)}
+                      className="w-3 h-3"
+                    />
+                    <span className="font-semibold">
+                      {primaryImageIndex === index ? "Primary" : "Set Primary"}
                     </span>
-                  )}
+                  </label>
                 </div>
               ))}
             </div>
