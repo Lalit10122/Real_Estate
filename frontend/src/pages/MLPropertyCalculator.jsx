@@ -26,7 +26,7 @@ import {
   Cell,
 } from "recharts";
 
-const ML_API_URL = "http://localhost:5000/api";
+const ML_API_URL = import.meta.env.VITE_ML_API_URL;
 
 const MLPropertyCalculator = () => {
   const [propertyType, setPropertyType] = useState("house");

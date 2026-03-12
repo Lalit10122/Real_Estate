@@ -1,20 +1,20 @@
-import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useEffect } from "react";
+import axios from "axios";
 
 // Create Context
 const AuthContext = createContext();
 
 // API Base URL
-const API_URL = 'http://localhost:8081/api';
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Auth Provider Component
 export const AuthProvider = ({ children }) => {
   // State variables
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [isBuyer, setIsBuyer] = useState(() => {
     // Check localStorage first, default to true
-    const saved = localStorage.getItem('isBuyer');
+    const saved = localStorage.getItem("isBuyer");
     return saved !== null ? JSON.parse(saved) : true;
   });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -22,14 +22,14 @@ export const AuthProvider = ({ children }) => {
 
   // Save isBuyer to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('isBuyer', JSON.stringify(isBuyer));
+    localStorage.setItem("isBuyer", JSON.stringify(isBuyer));
   }, [isBuyer]);
 
   // Verify token and get user info on mount
   useEffect(() => {
     const verifyToken = async () => {
-      const storedToken = localStorage.getItem('token');
-      
+      const storedToken = localStorage.getItem("token");
+
       if (!storedToken) {
         setLoading(false);
         return;
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
             id: userData.id,
             name: userData.name,
             email: userData.email,
-            phone: userData.phone || '',
+            phone: userData.phone || "",
             isBuyer: userData.isBuyer,
             role: userData.role,
           });
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
           handleLogout();
         }
       } catch (error) {
-        console.error('Token verification failed:', error);
+        console.error("Token verification failed:", error);
         handleLogout();
       } finally {
         setLoading(false);
@@ -76,32 +76,32 @@ export const AuthProvider = ({ children }) => {
         name,
         email,
         password,
-        phone: phone || '',
+        phone: phone || "",
       });
 
       if (response.data.success) {
         const { token, userId, userName, isBuyer } = response.data;
-        
-        localStorage.setItem('token', token);
+
+        localStorage.setItem("token", token);
         setToken(token);
-        
+
         setUser({
           id: userId,
           name: userName,
           email,
-          phone: phone || '',
+          phone: phone || "",
           isBuyer,
         });
-        
+
         setIsBuyer(isBuyer);
         setIsAuthenticated(true);
 
-        return { success: true, message: 'Registration successful' };
+        return { success: true, message: "Registration successful" };
       }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed',
+        message: error.response?.data?.message || "Registration failed",
       };
     }
   };
@@ -113,31 +113,31 @@ export const AuthProvider = ({ children }) => {
         name,
         email,
         password,
-        phone: phone || '',
+        phone: phone || "",
       });
 
       if (response.data.success) {
         const { token, userId, userName, isBuyer } = response.data;
-        
-        localStorage.setItem('token', token);
+
+        localStorage.setItem("token", token);
         setToken(token);
-        
+
         setUser({
           id: userId,
           name: userName,
           email,
           isBuyer,
         });
-        
+
         setIsBuyer(isBuyer);
         setIsAuthenticated(true);
 
-        return { success: true, message: 'Seller registration successful' };
+        return { success: true, message: "Seller registration successful" };
       }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed',
+        message: error.response?.data?.message || "Registration failed",
       };
     }
   };
@@ -152,34 +152,34 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data.success) {
         const { token, userId, userName, isBuyer } = response.data;
-        
-        localStorage.setItem('token', token);
+
+        localStorage.setItem("token", token);
         setToken(token);
-        
+
         setUser({
           id: userId,
           name: userName,
           email,
           isBuyer,
         });
-        
+
         setIsBuyer(isBuyer);
         setIsAuthenticated(true);
 
-        return { success: true, message: 'Login successful' };
+        return { success: true, message: "Login successful" };
       }
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Login failed',
+        message: error.response?.data?.message || "Login failed",
       };
     }
   };
 
   // Logout
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('isBuyer');
+    localStorage.removeItem("token");
+    localStorage.removeItem("isBuyer");
     setToken(null);
     setUser(null);
     setIsBuyer(true);
@@ -188,7 +188,7 @@ export const AuthProvider = ({ children }) => {
 
   // Toggle between Buyer and Seller mode
   const toggleUserMode = () => {
-    setIsBuyer(prev => !prev);
+    setIsBuyer((prev) => !prev);
   };
 
   // Check if user is seller
