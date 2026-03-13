@@ -94,7 +94,7 @@ const MLPropertyCalculator = () => {
 
   const fetchAreas = async () => {
     try {
-      const res = await fetch(`${ML_API_URL}/available-areas`).then((r) =>
+      const res = await fetch(`${ML_API_URL}/api/available-areas`).then((r) =>
         r.json(),
       );
       if (res.success && res.data.areas.length > 0) {
@@ -144,12 +144,12 @@ const MLPropertyCalculator = () => {
       };
 
       const [priceRes, investmentRes] = await Promise.all([
-        fetch(`${ML_API_URL}/predict-price`, {
+        fetch(`${ML_API_URL}/api/predict-price`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         }).then((r) => r.json()),
-        fetch(`${ML_API_URL}/calculate-investment`, {
+        fetch(`${ML_API_URL}/api/calculate-investment`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
