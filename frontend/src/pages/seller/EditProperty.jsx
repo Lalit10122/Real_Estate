@@ -41,7 +41,7 @@ const EditProperty = () => {
     amenities: [],
   });
 
-  const API_URL = "import.meta.env.VITE_BACKEND_URL";
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   // Fetch property data on mount
   useEffect(() => {

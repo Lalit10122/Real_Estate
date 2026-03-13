@@ -24,7 +24,7 @@ import axios from "axios";
 import SkeletonLoader from "../components/PropertyCardSkeleton";
 import { useLocation } from "react-router-dom";
 
-const API_URL = "import.meta.env.VITE_BACKEND_URL";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Search = () => {
   const location = useLocation();

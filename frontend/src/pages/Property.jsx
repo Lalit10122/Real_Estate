@@ -30,7 +30,7 @@ import {
 import axios from "axios";
 import MapComponent from "../components/MapComponent";
 
-const API_URL = "import.meta.env.VITE_BACKEND_URL";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Property = () => {
   const { propertyid } = useParams();

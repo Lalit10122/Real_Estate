@@ -1,68 +1,68 @@
-import React, { useState, useContext } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import AuthContext from '../context/AuthContext'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
+import React, { useState, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import AuthContext from "../context/AuthContext";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 const LogIn = () => {
-  const { login } = useContext(AuthContext) 
-  const navigate = useNavigate()
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  })
-  const [errors, setErrors] = useState({})
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
+    });
     if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: '' })
+      setErrors({ ...errors, [e.target.name]: "" });
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid'
+      newErrors.email = "Email is invalid";
     }
 
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = "Password is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password)
+      const result = await login(formData.email, formData.password);
 
       if (result.success) {
-        navigate('/')
+        navigate("/");
       } else {
-        setErrors({ form: result.message })
+        setErrors({ form: result.message });
       }
     } catch (error) {
-      setErrors({ form: 'An error occurred. Please try again.' })
+      setErrors({ form: "An error occurred. Please try again." });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -70,7 +70,9 @@ const LogIn = () => {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
           <div className="px-8 pt-8 pb-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-            <h2 className="text-3xl font-bold text-center mb-2">Welcome Back!</h2>
+            <h2 className="text-3xl font-bold text-center mb-2">
+              Welcome Back!
+            </h2>
             <p className="text-center text-blue-100">Sign in to your account</p>
           </div>
 
@@ -85,7 +87,9 @@ const LogIn = () => {
 
             {/* Email Field */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="text-gray-400" size={20} />
@@ -96,28 +100,32 @@ const LogIn = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
+                    errors.email ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="john@example.com"
                 />
               </div>
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             {/* Password Field */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="text-gray-400" size={20} />
                 </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
                   className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-500' : 'border-gray-300'
+                    errors.password ? "border-red-500" : "border-gray-300"
                   }`}
                   placeholder="••••••••"
                 />
@@ -127,18 +135,29 @@ const LogIn = () => {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showPassword ? (
-                    <EyeOff className="text-gray-400 hover:text-gray-600" size={20} />
+                    <EyeOff
+                      className="text-gray-400 hover:text-gray-600"
+                      size={20}
+                    />
                   ) : (
-                    <Eye className="text-gray-400 hover:text-gray-600" size={20} />
+                    <Eye
+                      className="text-gray-400 hover:text-gray-600"
+                      size={20}
+                    />
                   )}
                 </button>
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
             </div>
 
             {/* Forgot Password */}
             <div className="flex justify-end mb-6">
-              <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -155,7 +174,7 @@ const LogIn = () => {
                   <span>Signing in...</span>
                 </div>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </button>
           </form>
@@ -163,8 +182,11 @@ const LogIn = () => {
           {/* Register Link */}
           <div className="px-8 pb-8 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-700">
+              Don't have an account?{" "}
+              <Link
+                to="/register"
+                className="font-medium text-blue-600 hover:text-blue-700"
+              >
                 Register
               </Link>
             </p>
@@ -173,10 +195,16 @@ const LogIn = () => {
 
         {/* Features */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600 mb-4">Secure and easy access to your account</p>
+          <p className="text-sm text-gray-600 mb-4">
+            Secure and easy access to your account
+          </p>
           <div className="flex justify-center gap-8 text-xs text-gray-500">
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4 text-green-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -186,7 +214,11 @@ const LogIn = () => {
               <span>Secure</span>
             </div>
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4 text-green-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -196,7 +228,11 @@ const LogIn = () => {
               <span>Fast</span>
             </div>
             <div className="flex items-center gap-1">
-              <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg
+                className="w-4 h-4 text-green-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
                 <path
                   fillRule="evenodd"
                   d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -209,7 +245,7 @@ const LogIn = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LogIn
+export default LogIn;
