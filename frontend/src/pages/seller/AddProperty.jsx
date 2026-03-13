@@ -12,7 +12,7 @@ const AddProperty = () => {
   const [error, setError] = useState("");
   const [checkingSeller, setCheckingSeller] = useState(true);
 
-  const API_URL = "import.meta.env.VITE_BACKEND_URL";
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
 
   // Verify user is actually a seller from the server
   useEffect(() => {
