@@ -254,16 +254,12 @@ const AddProperty = () => {
       // Primary image index for backend
       data.append("primaryImageIndex", primaryImageIndex);
 
-      const response = await axios.post(
-        "http://localhost:8081/api/properties",
-        data,
-        {
-          headers: {
-            ...getAuthHeader(),
-            "Content-Type": "multipart/form-data",
-          },
+      const response = await axios.post(`${API_URL}/api/properties`, data, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "multipart/form-data",
         },
-      );
+      });
 
       if (response.data.success) {
         alert("Property added successfully!");
