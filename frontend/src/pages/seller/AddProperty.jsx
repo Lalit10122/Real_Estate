@@ -12,6 +12,8 @@ const AddProperty = () => {
   const [error, setError] = useState("");
   const [checkingSeller, setCheckingSeller] = useState(true);
 
+  const API_URL = "import.meta.env.VITE_BACKEND_URL";
+
   // Verify user is actually a seller from the server
   useEffect(() => {
     const verifySellerStatus = async () => {
@@ -21,12 +23,9 @@ const AddProperty = () => {
       }
 
       try {
-        const response = await axios.get(
-          "http://localhost:8081/api/users/verify-token",
-          {
-            headers: getAuthHeader(),
-          },
-        );
+        const response = await axios.get(`${API_URL}/users/verify-token`, {
+          headers: getAuthHeader(),
+        });
 
         if (response.data.success && response.data.user) {
           // Check if user is actually a seller
@@ -104,7 +103,9 @@ const AddProperty = () => {
 
     const combined = [...images, ...files];
     if (combined.length > 10) {
-      alert("You can upload a maximum of 10 images. Extra images will be ignored.");
+      alert(
+        "You can upload a maximum of 10 images. Extra images will be ignored.",
+      );
     }
 
     const nextImages = combined.slice(0, 10);
@@ -186,19 +187,31 @@ const AddProperty = () => {
       }
 
       if (formData.nearbySchools) {
-        formData.nearbySchools.split(",").map((s) => s.trim()).filter(Boolean).forEach((school, index) => {
-          data.append(`location[nearby][schools][${index}]`, school);
-        });
+        formData.nearbySchools
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .forEach((school, index) => {
+            data.append(`location[nearby][schools][${index}]`, school);
+          });
       }
       if (formData.nearbyHospitals) {
-        formData.nearbyHospitals.split(",").map((s) => s.trim()).filter(Boolean).forEach((hospital, index) => {
-          data.append(`location[nearby][hospitals][${index}]`, hospital);
-        });
+        formData.nearbyHospitals
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .forEach((hospital, index) => {
+            data.append(`location[nearby][hospitals][${index}]`, hospital);
+          });
       }
       if (formData.nearbyMalls) {
-        formData.nearbyMalls.split(",").map((s) => s.trim()).filter(Boolean).forEach((mall, index) => {
-          data.append(`location[nearby][malls][${index}]`, mall);
-        });
+        formData.nearbyMalls
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .forEach((mall, index) => {
+            data.append(`location[nearby][malls][${index}]`, mall);
+          });
       }
       if (formData.nearbyMetro) {
         data.append("location[nearby][metro]", formData.nearbyMetro);
@@ -756,7 +769,9 @@ const AddProperty = () => {
 
         {/* Availability & Visibility */}
         <div className="bg-white p-6 rounded-lg shadow border">
-          <h2 className="text-xl font-semibold mb-4">Availability & Visibility</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Availability & Visibility
+          </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -780,9 +795,7 @@ const AddProperty = () => {
                 onChange={handleChange}
                 className="w-4 h-4"
               />
-              <span className="text-sm font-medium">
-                Immediately Available
-              </span>
+              <span className="text-sm font-medium">Immediately Available</span>
             </div>
           </div>
 

@@ -8,7 +8,7 @@ import PropertySlider from "../components/PropertySlider";
 import { useNavigate } from "react-router-dom";
 import HomeFilter from "../components/HomeFIlter";
 
-const API_URL = "http://localhost:8081/api";
+const API_URL = "import.meta.env.VITE_BACKEND_URL";
 
 const Home = () => {
   const navigate = useNavigate();
