@@ -41,6 +41,8 @@ const EditProperty = () => {
     amenities: [],
   });
 
+  const API_URL = "import.meta.env.VITE_BACKEND_URL";
+
   // Fetch property data on mount
   useEffect(() => {
     const fetchPropertyData = async () => {
@@ -51,10 +53,9 @@ const EditProperty = () => {
       }
 
       try {
-        const response = await axios.get(
-          `http://localhost:8081/api/properties/${id}`,
-          { headers: getAuthHeader() }
-        );
+        const response = await axios.get(`${API_URL}/properties/${id}`, {
+          headers: getAuthHeader(),
+        });
 
         if (response.data.success) {
           const property = response.data.data || response.data.property;
@@ -94,8 +95,8 @@ const EditProperty = () => {
 
           // Set existing images - handle both string URLs and object format
           const images = property.images || [];
-          const imageUrls = images.map(img => {
-            if (typeof img === 'string') {
+          const imageUrls = images.map((img) => {
+            if (typeof img === "string") {
               return img;
             } else if (img && img.url) {
               return img.url;
@@ -207,11 +208,12 @@ const EditProperty = () => {
 
       // Append existing images that weren't removed (as URLs)
       const remainingImages = existingImages.filter(
-        (img) => !removedImages.includes(img)
+        (img) => !removedImages.includes(img),
       );
       remainingImages.forEach((imageUrl, index) => {
         // Send as string URL
-        const url = typeof imageUrl === 'string' ? imageUrl : (imageUrl.url || imageUrl);
+        const url =
+          typeof imageUrl === "string" ? imageUrl : imageUrl.url || imageUrl;
         data.append(`existingImages[${index}]`, url);
       });
 
@@ -220,16 +222,12 @@ const EditProperty = () => {
         data.append("images", image);
       });
 
-      const response = await axios.put(
-        `http://localhost:8081/api/properties/${id}`,
-        data,
-        {
-          headers: {
-            ...getAuthHeader(),
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axios.put(`${API_URL}/properties/${id}`, data, {
+        headers: {
+          ...getAuthHeader(),
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (response.data.success) {
         alert("Property updated successfully!");
@@ -617,7 +615,10 @@ const EditProperty = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {existingImages.map((imageUrl, index) => {
                   // Handle both string URLs and object format
-                  const url = typeof imageUrl === 'string' ? imageUrl : (imageUrl?.url || imageUrl);
+                  const url =
+                    typeof imageUrl === "string"
+                      ? imageUrl
+                      : imageUrl?.url || imageUrl;
                   const isRemoved = removedImages.includes(url);
                   return (
                     <div key={index} className="relative group">
@@ -628,8 +629,8 @@ const EditProperty = () => {
                           isRemoved ? "opacity-30" : ""
                         }`}
                         onError={(e) => {
-                          console.error('Image load error:', url);
-                          e.target.style.display = 'none';
+                          console.error("Image load error:", url);
+                          e.target.style.display = "none";
                         }}
                       />
                       {isRemoved ? (

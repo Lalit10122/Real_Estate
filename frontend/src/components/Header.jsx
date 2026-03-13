@@ -154,11 +154,7 @@ const Header = () => {
       <nav className="sticky top-0 z-50 bg-white border-b px-2">
         <div className="flex p-2 justify-between items-center">
           <Link to="/" className="font-bold text-xl ">
-            <img
-              className="w-auto h-18"
-              src="\src\assets\TerraPulse.jpeg"
-              alt="logo"
-            />
+            <img className="w-auto h-18" src="/TerraPulse.jpeg" alt="logo" />
           </Link>
 
           {/* Desktop Navigation */}

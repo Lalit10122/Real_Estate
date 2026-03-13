@@ -14,13 +14,15 @@ const MyProperties = () => {
     fetchProperties();
   }, [filter]);
 
+  const API_URL = "import.meta.env.VITE_BACKEND_URL";
+
   const fetchProperties = async () => {
     setLoading(true);
     try {
       const statusParam = filter !== "all" ? `?status=${filter}` : "";
       const response = await axios.get(
-        `http://localhost:8081/api/properties/user/me${statusParam}`,
-        { headers: getAuthHeader() }
+        `${API_URL}/properties/user/me${statusParam}`,
+        { headers: getAuthHeader() },
       );
       if (response.data.success) {
         setProperties(response.data.data);
@@ -38,10 +40,9 @@ const MyProperties = () => {
     }
 
     try {
-      const response = await axios.delete(
-        `http://localhost:8081/api/properties/${id}`,
-        { headers: getAuthHeader() }
-      );
+      const response = await axios.delete(`${API_URL}/properties/${id}`, {
+        headers: getAuthHeader(),
+      });
       if (response.data.success) {
         alert("Property deleted successfully!");
         fetchProperties();
@@ -104,7 +105,7 @@ const MyProperties = () => {
             >
               {status}
             </button>
-          )
+          ),
         )}
       </div>
 
@@ -152,8 +153,12 @@ const MyProperties = () => {
               <Link to={`/property/${property._id}`}>
                 {property.images && property.images.length > 0 ? (
                   <img
-                    src={typeof property.images[0] === 'string' ? property.images[0] : property.images[0].url || property.images[0]}
-                    alt={property.description || 'Property'}
+                    src={
+                      typeof property.images[0] === "string"
+                        ? property.images[0]
+                        : property.images[0].url || property.images[0]
+                    }
+                    alt={property.description || "Property"}
                     className="w-full h-48 object-cover"
                   />
                 ) : (
@@ -169,7 +174,7 @@ const MyProperties = () => {
                 <div className="mb-3">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      property.status
+                      property.status,
                     )}`}
                   >
                     {property.status}
@@ -179,20 +184,27 @@ const MyProperties = () => {
                 {/* Description */}
                 <Link to={`/property/${property._id}`}>
                   <h3 className="font-semibold text-lg mb-2 hover:text-blue-600 line-clamp-2">
-                    {property.description ? (property.description.length > 80 ? property.description.substring(0, 80) + '...' : property.description) : 'No description'}
+                    {property.description
+                      ? property.description.length > 80
+                        ? property.description.substring(0, 80) + "..."
+                        : property.description
+                      : "No description"}
                   </h3>
                 </Link>
 
                 {/* Location */}
                 <p className="text-sm text-gray-600 mb-2">
-                  {property.location?.area || ''}, {property.location?.city || ''}
+                  {property.location?.area || ""},{" "}
+                  {property.location?.city || ""}
                 </p>
 
                 {/* Price */}
                 <p className="text-xl font-bold text-blue-600 mb-3">
                   ₹
                   {property.price?.display ||
-                    (property.price?.amount ? property.price.amount.toLocaleString() : 'N/A')}
+                    (property.price?.amount
+                      ? property.price.amount.toLocaleString()
+                      : "N/A")}
                 </p>
 
                 {/* Metrics */}

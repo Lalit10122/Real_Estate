@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { 
-  Heart, 
-  Share2, 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Maximize2, 
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  Heart,
+  Share2,
+  MapPin,
+  Bed,
+  Bath,
+  Maximize2,
   Phone,
   Mail,
   CheckCircle,
@@ -25,50 +25,50 @@ import {
   Calendar,
   Car,
   Compass,
-  Home as HomeIcon
-} from 'lucide-react'
-import axios from 'axios'
-import MapComponent from '../components/MapComponent'
+  Home as HomeIcon,
+} from "lucide-react";
+import axios from "axios";
+import MapComponent from "../components/MapComponent";
 
-const API_URL = 'http://localhost:8081/api'
+const API_URL = "import.meta.env.VITE_BACKEND_URL";
 
 const Property = () => {
-  const { propertyid } = useParams()
-  const navigate = useNavigate()
-  const [property, setProperty] = useState(null)
-  const [isSaved, setIsSaved] = useState(false)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [showContactModal, setShowContactModal] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { propertyid } = useParams();
+  const navigate = useNavigate();
+  const [property, setProperty] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        setLoading(true)
-        setError('')
+        setLoading(true);
+        setError("");
 
-        const response = await axios.get(`${API_URL}/properties/${propertyid}`)
+        const response = await axios.get(`${API_URL}/properties/${propertyid}`);
 
         if (response.data?.success && response.data.data) {
-          const p = response.data.data
-          setProperty({ ...p, id: p._id || p.id })
+          const p = response.data.data;
+          setProperty({ ...p, id: p._id || p.id });
         } else {
-          setError('Property not found')
+          setError("Property not found");
         }
       } catch (err) {
-        console.error('Failed to fetch property:', err)
-        setError('Property not found')
+        console.error("Failed to fetch property:", err);
+        setError("Property not found");
       } finally {
-        setLoading(false)
-        window.scrollTo(0, 0)
+        setLoading(false);
+        window.scrollTo(0, 0);
       }
-    }
+    };
 
     if (propertyid) {
-      fetchProperty()
+      fetchProperty();
     }
-  }, [propertyid])
+  }, [propertyid]);
 
   if (loading) {
     return (
@@ -78,7 +78,7 @@ const Property = () => {
           <p className="text-gray-600 text-sm">Loading property details...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!property) {
@@ -86,12 +86,15 @@ const Property = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
           <AlertCircle className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold text-gray-900 mb-3">Property Not Found</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Property Not Found
+          </h2>
           <p className="text-gray-600 mb-6 text-lg">
-            {error || "The property you're looking for doesn't exist or may have been removed."}
+            {error ||
+              "The property you're looking for doesn't exist or may have been removed."}
           </p>
           <button
-            onClick={() => navigate('/search')}
+            onClick={() => navigate("/search")}
             className="px-8 py-4 bg-black text-white rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors inline-flex items-center gap-2"
           >
             <ChevronLeft size={20} />
@@ -99,41 +102,49 @@ const Property = () => {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   const formatPrice = (amount) => {
-    if (!amount || Number.isNaN(Number(amount))) return '₹N/A'
-    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`
-    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`
-    return `₹${(amount / 1000).toFixed(0)} K`
-  }
+    if (!amount || Number.isNaN(Number(amount))) return "₹N/A";
+    if (amount >= 10000000) return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    if (amount >= 100000) return `₹${(amount / 100000).toFixed(2)} L`;
+    return `₹${(amount / 1000).toFixed(0)} K`;
+  };
 
-  const bedrooms = property.description?.match(/(\d+)BHK/)?.[1] || 'N/A'
-  
-  const allImages = property.images?.length > 0 
-    ? property.images 
-    : [{ url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800", isPrimary: true }]
+  const bedrooms = property.description?.match(/(\d+)BHK/)?.[1] || "N/A";
+
+  const allImages =
+    property.images?.length > 0
+      ? property.images
+      : [
+          {
+            url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800",
+            isPrimary: true,
+          },
+        ];
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length)
-  }
+    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+  };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length)
-  }
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + allImages.length) % allImages.length,
+    );
+  };
 
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
         title: property.description,
-        url: window.location.href
-      })
+        url: window.location.href,
+      });
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,7 +164,7 @@ const Property = () => {
         <div className="relative bg-gray-900 h-[300px] sm:h-[400px] lg:h-[550px] rounded-3xl overflow-hidden mb-6">
           <img
             src={allImages[currentImageIndex]?.url}
-            alt={allImages[currentImageIndex]?.caption || 'Property'}
+            alt={allImages[currentImageIndex]?.caption || "Property"}
             className="w-full h-full object-cover"
           />
 
@@ -188,7 +199,9 @@ const Property = () => {
             >
               <Heart
                 size={22}
-                className={isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}
+                className={
+                  isSaved ? "fill-red-500 text-red-500" : "text-gray-700"
+                }
               />
             </button>
             <button
@@ -242,9 +255,9 @@ const Property = () => {
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden transition-all ${
-                    currentImageIndex === index 
-                      ? 'ring-4 ring-black scale-105' 
-                      : 'ring-2 ring-gray-300 opacity-70 hover:opacity-100'
+                    currentImageIndex === index
+                      ? "ring-4 ring-black scale-105"
+                      : "ring-2 ring-gray-300 opacity-70 hover:opacity-100"
                   }`}
                 >
                   <img
@@ -265,11 +278,17 @@ const Property = () => {
             {/* Title and Price Card */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                {bedrooms} BHK {property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)} for {property.listingType === 'rent' ? 'Rent' : 'Sale'}
+                {bedrooms} BHK{" "}
+                {property.propertyType.charAt(0).toUpperCase() +
+                  property.propertyType.slice(1)}{" "}
+                for {property.listingType === "rent" ? "Rent" : "Sale"}
               </h1>
 
               <div className="flex items-start gap-2 text-gray-600 mb-6">
-                <MapPin size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+                <MapPin
+                  size={20}
+                  className="text-red-500 flex-shrink-0 mt-0.5"
+                />
                 <div>
                   <p className="text-base font-semibold text-gray-800">
                     {property.location.area}, {property.location.city}
@@ -288,7 +307,9 @@ const Property = () => {
               <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">
-                    {property.listingType === 'rent' ? 'Monthly Rent' : 'Total Price'}
+                    {property.listingType === "rent"
+                      ? "Monthly Rent"
+                      : "Total Price"}
                   </p>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl sm:text-4xl font-bold text-gray-900">
@@ -315,19 +336,23 @@ const Property = () => {
                 </button>
               </div>
 
-              {property.listingType === 'rent' && property.rental && (
+              {property.listingType === "rent" && property.rental && (
                 <div className="mt-4 pt-4 border-t border-gray-200">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                      <p className="text-xs text-blue-600 font-semibold mb-1">Security Deposit</p>
+                      <p className="text-xs text-blue-600 font-semibold mb-1">
+                        Security Deposit
+                      </p>
                       <p className="text-xl font-bold text-gray-900">
                         {formatPrice(property.rental.securityDeposit)}
                       </p>
                     </div>
                     <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
-                      <p className="text-xs text-purple-600 font-semibold mb-1">Lease Duration</p>
+                      <p className="text-xs text-purple-600 font-semibold mb-1">
+                        Lease Duration
+                      </p>
                       <p className="text-xl font-bold text-gray-900">
-                        {property.rental.leaseDuration || '11 months'}
+                        {property.rental.leaseDuration || "11 months"}
                       </p>
                     </div>
                   </div>
@@ -337,8 +362,10 @@ const Property = () => {
 
             {/* Key Features */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900 mb-5">Property Overview</h2>
-              
+              <h2 className="text-xl font-bold text-gray-900 mb-5">
+                Property Overview
+              </h2>
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
                   <Bed className="w-8 h-8 text-blue-600 mx-auto mb-2" />
@@ -349,21 +376,27 @@ const Property = () => {
                 <div className="text-center p-4 bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl border border-cyan-200">
                   <Bath className="w-8 h-8 text-cyan-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-gray-900">
-                    {(property.features?.parking?.covered || 0) + (property.features?.parking?.open || 0) || 2}
+                    {(property.features?.parking?.covered || 0) +
+                      (property.features?.parking?.open || 0) || 2}
                   </p>
                   <p className="text-xs text-gray-600 font-medium">Bathrooms</p>
                 </div>
 
                 <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
                   <Maximize2 className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-gray-900">{property.area.value}</p>
-                  <p className="text-xs text-gray-600 font-medium">{property.area.unit}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {property.area.value}
+                  </p>
+                  <p className="text-xs text-gray-600 font-medium">
+                    {property.area.unit}
+                  </p>
                 </div>
 
                 <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
                   <Car className="w-8 h-8 text-purple-600 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-gray-900">
-                    {(property.features?.parking?.covered || 0) + (property.features?.parking?.open || 0)}
+                    {(property.features?.parking?.covered || 0) +
+                      (property.features?.parking?.open || 0)}
                   </p>
                   <p className="text-xs text-gray-600 font-medium">Parking</p>
                 </div>
@@ -376,18 +409,24 @@ const Property = () => {
                     <Sofa className="text-orange-600 flex-shrink-0" size={22} />
                     <div>
                       <p className="text-xs text-gray-600">Furnishing</p>
-                      <p className="font-bold text-gray-900 capitalize">{property.features.furnished}</p>
+                      <p className="font-bold text-gray-900 capitalize">
+                        {property.features.furnished}
+                      </p>
                     </div>
                   </div>
                 )}
 
                 {property.features?.floorNumber && (
                   <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
-                    <Layers className="text-indigo-600 flex-shrink-0" size={22} />
+                    <Layers
+                      className="text-indigo-600 flex-shrink-0"
+                      size={22}
+                    />
                     <div>
                       <p className="text-xs text-gray-600">Floor</p>
                       <p className="font-bold text-gray-900">
-                        {property.features.floorNumber} of {property.features.totalFloors}
+                        {property.features.floorNumber} of{" "}
+                        {property.features.totalFloors}
                       </p>
                     </div>
                   </div>
@@ -398,17 +437,24 @@ const Property = () => {
                     <Wind className="text-teal-600 flex-shrink-0" size={22} />
                     <div>
                       <p className="text-xs text-gray-600">Facing</p>
-                      <p className="font-bold text-gray-900 capitalize">{property.features.facing}</p>
+                      <p className="font-bold text-gray-900 capitalize">
+                        {property.features.facing}
+                      </p>
                     </div>
                   </div>
                 )}
 
                 {property.features?.age && (
                   <div className="flex items-center gap-3 p-3 bg-pink-50 rounded-xl border border-pink-100">
-                    <Calendar className="text-pink-600 flex-shrink-0" size={22} />
+                    <Calendar
+                      className="text-pink-600 flex-shrink-0"
+                      size={22}
+                    />
                     <div>
                       <p className="text-xs text-gray-600">Property Age</p>
-                      <p className="font-bold text-gray-900">{property.features.age} years</p>
+                      <p className="font-bold text-gray-900">
+                        {property.features.age} years
+                      </p>
                     </div>
                   </div>
                 )}
@@ -417,25 +463,33 @@ const Property = () => {
 
             {/* Description */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">About This Property</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                About This Property
+              </h2>
               <p className="text-gray-700 leading-relaxed text-base">
-                {property.description || 'This is a beautiful property with modern amenities and excellent connectivity.'}
+                {property.description ||
+                  "This is a beautiful property with modern amenities and excellent connectivity."}
               </p>
             </div>
 
             {/* Amenities */}
             {property.amenities && property.amenities.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Amenities</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Amenities
+                </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {property.amenities.map((amenity, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-100"
                     >
-                      <CheckCircle size={18} className="text-green-600 flex-shrink-0" />
+                      <CheckCircle
+                        size={18}
+                        className="text-green-600 flex-shrink-0"
+                      />
                       <span className="text-sm font-semibold text-gray-900 capitalize">
-                        {amenity.replace('-', ' ')}
+                        {amenity.replace("-", " ")}
                       </span>
                     </div>
                   ))}
@@ -446,23 +500,35 @@ const Property = () => {
             {/* Building Info */}
             {property.apartment?.societyName && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Building Details</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  Building Details
+                </h2>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                    <Building2 className="text-blue-600 flex-shrink-0" size={24} />
+                    <Building2
+                      className="text-blue-600 flex-shrink-0"
+                      size={24}
+                    />
                     <div>
                       <p className="text-sm text-gray-600">Society Name</p>
-                      <p className="font-bold text-gray-900 text-lg">{property.apartment.societyName}</p>
+                      <p className="font-bold text-gray-900 text-lg">
+                        {property.apartment.societyName}
+                      </p>
                     </div>
                   </div>
 
                   {property.apartment.maintenanceCharges && (
                     <div className="flex items-center gap-3 p-4 bg-green-50 rounded-xl border border-green-100">
-                      <IndianRupee className="text-green-600 flex-shrink-0" size={24} />
+                      <IndianRupee
+                        className="text-green-600 flex-shrink-0"
+                        size={24}
+                      />
                       <div>
                         <p className="text-sm text-gray-600">Maintenance</p>
                         <p className="font-bold text-gray-900 text-lg">
-                          ₹{property.apartment.maintenanceCharges.toLocaleString()}/{property.apartment.maintenanceFrequency}
+                          ₹
+                          {property.apartment.maintenanceCharges.toLocaleString()}
+                          /{property.apartment.maintenanceFrequency}
                         </p>
                       </div>
                     </div>
@@ -474,46 +540,71 @@ const Property = () => {
             {/* Nearby Places */}
             {property.location.nearby && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">What's Nearby</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                  What's Nearby
+                </h2>
                 <div className="space-y-4">
-                  {property.location.nearby.schools && property.location.nearby.schools.length > 0 && (
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 mb-2">🏫 Schools</p>
-                      <div className="space-y-1 ml-4">
-                        {property.location.nearby.schools.map((school, index) => (
-                          <p key={index} className="text-sm text-gray-600">• {school}</p>
-                        ))}
+                  {property.location.nearby.schools &&
+                    property.location.nearby.schools.length > 0 && (
+                      <div>
+                        <p className="text-sm font-bold text-gray-700 mb-2">
+                          🏫 Schools
+                        </p>
+                        <div className="space-y-1 ml-4">
+                          {property.location.nearby.schools.map(
+                            (school, index) => (
+                              <p key={index} className="text-sm text-gray-600">
+                                • {school}
+                              </p>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {property.location.nearby.hospitals && property.location.nearby.hospitals.length > 0 && (
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 mb-2">🏥 Hospitals</p>
-                      <div className="space-y-1 ml-4">
-                        {property.location.nearby.hospitals.map((hospital, index) => (
-                          <p key={index} className="text-sm text-gray-600">• {hospital}</p>
-                        ))}
+                  {property.location.nearby.hospitals &&
+                    property.location.nearby.hospitals.length > 0 && (
+                      <div>
+                        <p className="text-sm font-bold text-gray-700 mb-2">
+                          🏥 Hospitals
+                        </p>
+                        <div className="space-y-1 ml-4">
+                          {property.location.nearby.hospitals.map(
+                            (hospital, index) => (
+                              <p key={index} className="text-sm text-gray-600">
+                                • {hospital}
+                              </p>
+                            ),
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {property.location.nearby.malls && property.location.nearby.malls.length > 0 && (
-                    <div>
-                      <p className="text-sm font-bold text-gray-700 mb-2">🛍️ Shopping</p>
-                      <div className="space-y-1 ml-4">
-                        {property.location.nearby.malls.map((mall, index) => (
-                          <p key={index} className="text-sm text-gray-600">• {mall}</p>
-                        ))}
+                  {property.location.nearby.malls &&
+                    property.location.nearby.malls.length > 0 && (
+                      <div>
+                        <p className="text-sm font-bold text-gray-700 mb-2">
+                          🛍️ Shopping
+                        </p>
+                        <div className="space-y-1 ml-4">
+                          {property.location.nearby.malls.map((mall, index) => (
+                            <p key={index} className="text-sm text-gray-600">
+                              • {mall}
+                            </p>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   {property.location.nearby.metro && (
                     <div>
-                      <p className="text-sm font-bold text-gray-700 mb-2">🚇 Metro</p>
+                      <p className="text-sm font-bold text-gray-700 mb-2">
+                        🚇 Metro
+                      </p>
                       <div className="ml-4">
-                        <p className="text-sm text-gray-600">• {property.location.nearby.metro}</p>
+                        <p className="text-sm text-gray-600">
+                          • {property.location.nearby.metro}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -543,7 +634,9 @@ const Property = () => {
                     {property.owner.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-lg">{property.owner.name}</h3>
+                    <h3 className="font-bold text-gray-900 text-lg">
+                      {property.owner.name}
+                    </h3>
                     <div className="flex items-center gap-2 mt-1">
                       {property.owner.verified && (
                         <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-md font-bold flex items-center gap-1">
@@ -578,28 +671,40 @@ const Property = () => {
 
               {/* Property Stats */}
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 text-lg">Property Insights</h3>
+                <h3 className="font-bold text-gray-900 mb-4 text-lg">
+                  Property Insights
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl border border-blue-200">
                     <div className="flex items-center gap-3">
                       <Eye size={20} className="text-blue-600" />
-                      <span className="text-sm font-semibold text-gray-700">Views</span>
+                      <span className="text-sm font-semibold text-gray-700">
+                        Views
+                      </span>
                     </div>
-                    <span className="font-bold text-gray-900 text-lg">{property.metrics?.views || 0}</span>
+                    <span className="font-bold text-gray-900 text-lg">
+                      {property.metrics?.views || 0}
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-xl border border-pink-200">
                     <div className="flex items-center gap-3">
                       <Heart size={20} className="text-pink-600" />
-                      <span className="text-sm font-semibold text-gray-700">Favorites</span>
+                      <span className="text-sm font-semibold text-gray-700">
+                        Favorites
+                      </span>
                     </div>
-                    <span className="font-bold text-gray-900 text-lg">{property.metrics?.favorites || 0}</span>
+                    <span className="font-bold text-gray-900 text-lg">
+                      {property.metrics?.favorites || 0}
+                    </span>
                   </div>
 
                   {property.metrics?.trending && (
                     <div className="flex items-center justify-center p-3 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border-2 border-orange-300">
                       <TrendingUp size={20} className="text-orange-600 mr-2" />
-                      <span className="text-sm font-bold text-orange-700">🔥 Trending</span>
+                      <span className="text-sm font-bold text-orange-700">
+                        🔥 Trending
+                      </span>
                     </div>
                   )}
                 </div>
@@ -607,8 +712,12 @@ const Property = () => {
 
               {/* Property ID */}
               <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-5 border border-gray-300">
-                <p className="text-xs text-gray-600 font-semibold mb-1.5">Property ID</p>
-                <p className="font-mono font-bold text-gray-900 text-lg">#{property.id.toString().padStart(6, '0')}</p>
+                <p className="text-xs text-gray-600 font-semibold mb-1.5">
+                  Property ID
+                </p>
+                <p className="font-mono font-bold text-gray-900 text-lg">
+                  #{property.id.toString().padStart(6, "0")}
+                </p>
               </div>
             </div>
           </div>
@@ -618,7 +727,7 @@ const Property = () => {
       {/* Contact Modal */}
       {showContactModal && (
         <>
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
             onClick={() => setShowContactModal(false)}
           />
@@ -631,7 +740,9 @@ const Property = () => {
                 <X size={20} />
               </button>
 
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 pr-8">Contact Owner</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 pr-8">
+                Contact Owner
+              </h3>
 
               <div className="space-y-4">
                 <a
@@ -642,8 +753,12 @@ const Property = () => {
                     <Phone className="text-white" size={24} />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Phone Number</p>
-                    <p className="font-bold text-gray-900 text-lg">{property.owner.phone}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Phone Number
+                    </p>
+                    <p className="font-bold text-gray-900 text-lg">
+                      {property.owner.phone}
+                    </p>
                   </div>
                 </a>
 
@@ -655,8 +770,12 @@ const Property = () => {
                     <Mail className="text-white" size={24} />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 font-medium">Email Address</p>
-                    <p className="font-bold text-gray-900 text-lg break-all">{property.owner.email}</p>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Email Address
+                    </p>
+                    <p className="font-bold text-gray-900 text-lg break-all">
+                      {property.owner.email}
+                    </p>
                   </div>
                 </a>
               </div>
@@ -671,8 +790,7 @@ const Property = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Property
-
+export default Property;
